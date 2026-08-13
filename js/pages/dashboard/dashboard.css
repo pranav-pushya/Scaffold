@@ -1,0 +1,24 @@
+/* === DASHBOARD PAGE CSS === */
+.dashboard-wrapper {
+    padding: 100px 24px 60px;
+    min-height: calc(100vh - 80px);
+}
+
+.dashboard-hero-banner,
+.dashboard-score-card,
+.dashboard-stat-card {
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.dashboard-hero-banner:hover,
+.dashboard-score-card:hover,
+.dashboard-stat-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 640px) {
+    .dashboard-wrapper {
+        padding: 90px 14px 50px;
+    }
+}

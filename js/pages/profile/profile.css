@@ -1,0 +1,99 @@
+/* === COMPREHENSIVE PROFILE PAGE CSS === */
+.profile-wrapper {
+    padding: 100px 24px 80px;
+    min-height: calc(100vh - 80px);
+}
+
+.profile-container {
+    max-width: 920px;
+    margin: 0 auto;
+}
+
+.profile-fieldset {
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+    position: relative;
+    background: rgba(var(--accent-rgb), 0.015);
+}
+
+.profile-legend {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #10b981;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--fg-dim);
+    margin-bottom: 6px;
+}
+
+.profile-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    color: var(--fg);
+    padding: 12px 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.25s ease;
+}
+
+.profile-input:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.profile-select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    color: var(--fg);
+    padding: 12px 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+}
+
+.profile-select:focus {
+    border-color: #10b981;
+}
+
+.avatar-preview-box {
+    width: 90px;
+    height: 90px;
+    border-radius: 16px;
+    border: 2px solid #10b981;
+    background: rgba(16, 185, 129, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+@media (max-width: 640px) {
+    .profile-wrapper {
+        padding: 90px 14px 60px;
+    }
+    .profile-fieldset {
+        padding: 16px;
+    }
+}

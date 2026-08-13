@@ -1,0 +1,53 @@
+/* === AI ASSISTANT PAGE CSS === */
+.assistant-wrapper {
+    padding: 100px 24px 60px;
+    min-height: calc(100vh - 80px);
+}
+
+.prompt-chip-btn {
+    background: var(--bg);
+    border-color: var(--border-strong);
+    cursor: pointer;
+}
+
+.prompt-chip-btn:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+/* === THEME MATCHED SELECT & OPTIONS === */
+#assistantModeSelect {
+    background-color: var(--bg);
+    color: var(--fg);
+    cursor: pointer;
+}
+
+#assistantModeSelect option {
+    background-color: var(--card);
+    color: var(--fg);
+    padding: 8px 12px;
+}
+
+[data-theme="cyber"] #assistantModeSelect,
+[data-theme="cyber"] #assistantModeSelect option {
+    background-color: #05140d !important;
+    color: #4eff96 !important;
+}
+
+[data-theme="dark"] #assistantModeSelect,
+[data-theme="dark"] #assistantModeSelect option {
+    background-color: #161a23 !important;
+    color: #f3f4f6 !important;
+}
+
+[data-theme="light"] #assistantModeSelect,
+[data-theme="light"] #assistantModeSelect option {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+}
+
+@media (max-width: 640px) {
+    .assistant-wrapper {
+        padding: 90px 14px 50px;
+    }
+}

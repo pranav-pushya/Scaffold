@@ -1,0 +1,21 @@
+/* === BOOT PAGE CSS === */
+.boot-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #02060a;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    padding: 24px;
+}
+
+.boot-terminal {
+    max-width: 650px;
+    width: 100%;
+    background: rgba(5, 13, 16, 0.9);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 32px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}

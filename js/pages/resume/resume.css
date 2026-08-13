@@ -1,0 +1,81 @@
+/* === ATS RESUME EXPORTER CSS === */
+.resume-wrapper {
+    padding: 100px 24px 80px;
+    min-height: calc(100vh - 80px);
+}
+
+.resume-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.resume-sheet {
+    background: #ffffff;
+    color: #111827;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 48px;
+    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.dark .resume-sheet, .cyber .resume-sheet {
+    background: #ffffff;
+    color: #111827;
+}
+
+.resume-header-name {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #111827;
+}
+
+.resume-header-role {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #059669;
+    margin-top: 4px;
+}
+
+.resume-section-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #111827;
+    border-bottom: 2px solid #111827;
+    padding-bottom: 4px;
+    margin-bottom: 12px;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .resume-sheet, .resume-sheet * {
+        visibility: visible;
+    }
+    .resume-sheet {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        border: none;
+        box-shadow: none;
+    }
+    header, footer, .no-print {
+        display: none !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .resume-wrapper {
+        padding: 90px 14px 60px;
+    }
+    .resume-sheet {
+        padding: 20px;
+    }
+}

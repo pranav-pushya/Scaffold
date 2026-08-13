@@ -1,0 +1,74 @@
+/* === PORTFOLIO PAGE CSS === */
+.portfolio-wrapper {
+    padding: 100px 24px 80px;
+    min-height: calc(100vh - 80px);
+}
+
+.portfolio-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.portfolio-hero-card {
+    background: var(--card);
+    border: 1px solid var(--border-strong);
+    border-radius: 16px;
+    padding: 36px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+}
+
+.portfolio-section-card {
+    background: var(--card);
+    border: 1px solid var(--border-strong);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 28px;
+}
+
+.portfolio-project-card {
+    background: rgba(var(--accent-rgb), 0.02);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.portfolio-project-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+}
+
+.nav-pill-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-family: 'Space Grotesk', monospace;
+    font-size: 0.75rem;
+    background: rgba(var(--accent-rgb), 0.05);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.nav-pill-link:hover, .nav-pill-link.active {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+}
+
+@media (max-width: 640px) {
+    .portfolio-wrapper {
+        padding: 90px 14px 60px;
+    }
+    .portfolio-hero-card {
+        padding: 20px;
+    }
+    .portfolio-section-card {
+        padding: 18px;
+    }
+}
