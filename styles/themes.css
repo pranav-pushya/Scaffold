@@ -1,0 +1,57 @@
+/* === THEME TOKENS === */
+:root[data-theme="dark"] {
+    --bg: #0c0b09;
+    --bg-elev: #14120e;
+    --bg-elev-2: #1c1a14;
+    --fg: #f0ead6;
+    --fg-dim: #c9c1ad;
+    --muted: #8a8275;
+    --accent: #f59e0b;
+    --accent-rgb: 245, 158, 11;
+    --accent-2: #06b6d4;
+    --accent-2-rgb: 6, 182, 212;
+    --border: rgba(240, 234, 214, 0.08);
+    --border-strong: rgba(240, 234, 214, 0.18);
+    --card: #15130e;
+    --code-bg: #060503;
+    --code-fg: #f0ead6;
+    --glow: rgba(245, 158, 11, 0.15);
+}
+
+:root[data-theme="light"] {
+    --bg: #f3ecdc;
+    --bg-elev: #faf3e1;
+    --bg-elev-2: #fffaee;
+    --fg: #1a1610;
+    --fg-dim: #3d362b;
+    --muted: #6b6358;
+    --accent: #c2410c;
+    --accent-rgb: 194, 65, 12;
+    --accent-2: #0e7490;
+    --accent-2-rgb: 14, 116, 144;
+    --border: rgba(26, 22, 16, 0.12);
+    --border-strong: rgba(26, 22, 16, 0.24);
+    --card: #fffaee;
+    --code-bg: #1a1610;
+    --code-fg: #f3ecdc;
+    --glow: rgba(194, 65, 12, 0.12);
+}
+
+:root[data-theme="cyber"] {
+    --bg: #02060a;
+    --bg-elev: #050d10;
+    --bg-elev-2: #071318;
+    --fg: #4eff96;
+    --fg-dim: #8affb8;
+    --muted: #2a8a5e;
+    --accent: #ffea00;
+    --accent-rgb: 255, 234, 0;
+    --accent-2: #ff10f0;
+    --accent-2-rgb: 255, 16, 240;
+    --border: rgba(78, 255, 150, 0.18);
+    --border-strong: rgba(78, 255, 150, 0.4);
+    --card: #050d10;
+    --code-bg: #000;
+    --code-fg: #4eff96;
+    --glow: rgba(78, 255, 150, 0.2);
+}
