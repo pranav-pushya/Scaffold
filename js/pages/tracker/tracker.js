@@ -1,17 +1,12 @@
 // === KANBAN JOB & PROJECT TRACKER PAGE ===
-// Real-time 3-column Kanban project tracker matching screenshot design specification
+// Real-time 3-column Kanban project tracker matching specification with non-blocking initial rendering
 
 import { getCurrentAuthUser } from '../../../firebase/authService.js';
-import { getProjects, saveProject, updateProject, deleteProject } from '../../../firebase/firestoreService.js';
+import { getProjects, saveProject, updateProject, deleteProject, fetchWithTimeout } from '../../../firebase/firestoreService.js';
 
-export async function renderTrackerPage() {
-    const user = getCurrentAuthUser() || { uid: 'demo' };
-    const projects = await getProjects(user.uid);
+let cachedProjects = [];
 
-    const todoCards = projects.filter(p => p.status === 'To-Do' || !p.status);
-    const inProgressCards = projects.filter(p => p.status === 'In Progress');
-    const doneCards = projects.filter(p => p.status === 'Done');
-
+export function renderTrackerPage() {
     return `
     <div class="tracker-wrapper">
         <div class="tracker-container">
@@ -25,6 +20,10 @@ export async function renderTrackerPage() {
                 <button id="toggleCardFormBtn" class="btn-primary text-xs px-4 py-2.5" style="background: #10b981; color: #fff;">
                     <i class="fas fa-plus mr-1"></i> Add New Card
                 </button>
+            </div>
+
+            <!-- Async Loading / Connection Error Status Indicator -->
+            <div id="trackerDataStatus" class="mb-6 p-3 rounded-lg border font-mono text-xs hidden" style="background: var(--card); border-color: var(--border);">
             </div>
 
             <!-- Create / Edit Tracker Card Form Container -->
@@ -84,12 +83,14 @@ export async function renderTrackerPage() {
                 <div class="kanban-column">
                     <div class="flex items-center justify-between mb-6 pb-2 border-b" style="border-color: var(--border);">
                         <h3 class="font-mono font-bold text-sm" style="color: var(--fg);">To-Do</h3>
-                        <span class="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs border" style="border-color: var(--border-strong); color: var(--muted); background: var(--bg);">
-                            ${todoCards.length}
+                        <span id="countTodo" class="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs border" style="border-color: var(--border-strong); color: var(--muted); background: var(--bg);">
+                            0
                         </span>
                     </div>
-                    <div class="space-y-4 flex-1">
-                        ${todoCards.length ? todoCards.map(card => renderKanbanCard(card)).join('') : '<div class="text-xs text-muted font-mono italic p-4 text-center border border-dashed rounded-lg" style="border-color: var(--border);">No cards in To-Do</div>'}
+                    <div id="columnTodo" class="space-y-4 flex-1">
+                        <div class="text-xs text-muted font-mono italic p-4 text-center border border-dashed rounded-lg" style="border-color: var(--border);">
+                            <i class="fas fa-circle-notch fa-spin mr-1 text-emerald-500"></i> Syncing cards...
+                        </div>
                     </div>
                 </div>
 
@@ -97,12 +98,14 @@ export async function renderTrackerPage() {
                 <div class="kanban-column">
                     <div class="flex items-center justify-between mb-6 pb-2 border-b" style="border-color: var(--border);">
                         <h3 class="font-mono font-bold text-sm text-emerald-500">In Progress</h3>
-                        <span class="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs border" style="border-color: var(--border-strong); color: var(--muted); background: var(--bg);">
-                            ${inProgressCards.length}
+                        <span id="countInProgress" class="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs border" style="border-color: var(--border-strong); color: var(--muted); background: var(--bg);">
+                            0
                         </span>
                     </div>
-                    <div class="space-y-4 flex-1">
-                        ${inProgressCards.length ? inProgressCards.map(card => renderKanbanCard(card)).join('') : '<div class="text-xs text-muted font-mono italic p-4 text-center border border-dashed rounded-lg" style="border-color: var(--border);">No cards in Progress</div>'}
+                    <div id="columnInProgress" class="space-y-4 flex-1">
+                        <div class="text-xs text-muted font-mono italic p-4 text-center border border-dashed rounded-lg" style="border-color: var(--border);">
+                            <i class="fas fa-circle-notch fa-spin mr-1 text-emerald-500"></i> Syncing cards...
+                        </div>
                     </div>
                 </div>
 
@@ -110,12 +113,14 @@ export async function renderTrackerPage() {
                 <div class="kanban-column">
                     <div class="flex items-center justify-between mb-6 pb-2 border-b" style="border-color: var(--border);">
                         <h3 class="font-mono font-bold text-sm" style="color: var(--fg);">Done</h3>
-                        <span class="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs border" style="border-color: var(--border-strong); color: var(--muted); background: var(--bg);">
-                            ${doneCards.length}
+                        <span id="countDone" class="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs border" style="border-color: var(--border-strong); color: var(--muted); background: var(--bg);">
+                            0
                         </span>
                     </div>
-                    <div class="space-y-4 flex-1">
-                        ${doneCards.length ? doneCards.map(card => renderKanbanCard(card)).join('') : '<div class="text-xs text-muted font-mono italic p-4 text-center border border-dashed rounded-lg" style="border-color: var(--border);">No completed cards</div>'}
+                    <div id="columnDone" class="space-y-4 flex-1">
+                        <div class="text-xs text-muted font-mono italic p-4 text-center border border-dashed rounded-lg" style="border-color: var(--border);">
+                            <i class="fas fa-circle-notch fa-spin mr-1 text-emerald-500"></i> Syncing cards...
+                        </div>
                     </div>
                 </div>
 
@@ -176,6 +181,123 @@ export function bindTrackerEvents() {
     const cancelBtn = document.getElementById('cancelCardFormBtn');
     const cardForm = document.getElementById('trackerCardForm');
     const formTitle = document.getElementById('cardFormTitle');
+    const statusBox = document.getElementById('trackerDataStatus');
+
+    // Intermediate 3s soft loading notice
+    const slowTimer = setTimeout(() => {
+        if (statusBox && !statusBox.classList.contains('hidden')) {
+            statusBox.innerHTML = `<span class="text-amber-400"><i class="fas fa-circle-notch fa-spin mr-1"></i> Still loading, this may take a moment on slow connections...</span>`;
+        }
+    }, 3000);
+
+    // 20s soft timeout notice
+    const softTimeoutTimer = setTimeout(() => {
+        if (statusBox && !statusBox.classList.contains('hidden')) {
+            statusBox.innerHTML = `<span class="text-amber-400"><i class="fas fa-circle-notch fa-spin mr-1"></i> Still establishing Firestore connection...</span>`;
+        }
+    }, 20000);
+
+    // Async data fetch with 20s timeout margin
+    fetchWithTimeout(getProjects(user.uid), 20000)
+        .then((projects) => {
+            clearTimeout(slowTimer);
+            clearTimeout(softTimeoutTimer);
+            if (!projects) projects = [];
+            cachedProjects = projects;
+            if (statusBox) statusBox.classList.add('hidden');
+            renderBoardColumns(projects);
+        })
+        .catch((err) => {
+            clearTimeout(slowTimer);
+            clearTimeout(softTimeoutTimer);
+            console.error('Tracker fetch ACTUAL ERROR object:', err);
+            if (statusBox) {
+                statusBox.classList.remove('hidden');
+                statusBox.innerHTML = `<span class="text-amber-400">⚠️ Unable to load saved cards — ${err.message || err}. You can still create new cards locally.</span>`;
+            }
+            renderBoardColumns([]);
+        });
+
+    function renderBoardColumns(projects) {
+        const todoCards = projects.filter(p => p.status === 'To-Do' || !p.status);
+        const inProgressCards = projects.filter(p => p.status === 'In Progress');
+        const doneCards = projects.filter(p => p.status === 'Done');
+
+        const colTodo = document.getElementById('columnTodo');
+        const colInProgress = document.getElementById('columnInProgress');
+        const colDone = document.getElementById('columnDone');
+
+        const cntTodo = document.getElementById('countTodo');
+        const cntInProgress = document.getElementById('countInProgress');
+        const cntDone = document.getElementById('countDone');
+
+        if (cntTodo) cntTodo.innerText = todoCards.length;
+        if (cntInProgress) cntInProgress.innerText = inProgressCards.length;
+        if (cntDone) cntDone.innerText = doneCards.length;
+
+        if (colTodo) {
+            colTodo.innerHTML = todoCards.length
+                ? todoCards.map(c => renderKanbanCard(c)).join('')
+                : '<div class="text-xs text-muted font-mono italic p-4 text-center border border-dashed rounded-lg" style="border-color: var(--border);">No cards in To-Do</div>';
+        }
+
+        if (colInProgress) {
+            colInProgress.innerHTML = inProgressCards.length
+                ? inProgressCards.map(c => renderKanbanCard(c)).join('')
+                : '<div class="text-xs text-muted font-mono italic p-4 text-center border border-dashed rounded-lg" style="border-color: var(--border);">No cards in Progress</div>';
+        }
+
+        if (colDone) {
+            colDone.innerHTML = doneCards.length
+                ? doneCards.map(c => renderKanbanCard(c)).join('')
+                : '<div class="text-xs text-muted font-mono italic p-4 text-center border border-dashed rounded-lg" style="border-color: var(--border);">No completed cards</div>';
+        }
+
+        attachCardHandlers();
+    }
+
+    function attachCardHandlers() {
+        // Handle Status Change via Dropdown Select
+        document.querySelectorAll('.card-status-select').forEach(select => {
+            select.addEventListener('change', async (e) => {
+                const cardId = select.dataset.cardId;
+                const newStatus = select.value;
+                await updateProject(user.uid, { id: cardId, status: newStatus });
+                const updated = await getProjects(user.uid);
+                renderBoardColumns(updated);
+            });
+        });
+
+        // Handle Edit Card Button
+        document.querySelectorAll('.edit-card-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const cardId = btn.dataset.editId;
+                const card = cachedProjects.find(p => p.id === cardId);
+                if (card) {
+                    document.getElementById('cardEditId').value = card.id;
+                    document.getElementById('cardTitle').value = card.title || card.name || '';
+                    document.getElementById('cardTech').value = card.techStack || card.tech || '';
+                    document.getElementById('cardRepo').value = card.repoUrl || '';
+                    document.getElementById('cardDeploy').value = card.deployUrl || '';
+                    document.getElementById('cardStatus').value = card.status || 'To-Do';
+                    document.getElementById('cardDesc').value = card.description || '';
+                    toggleForm(true, true);
+                }
+            });
+        });
+
+        // Handle Delete Card Button
+        document.querySelectorAll('.delete-card-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const cardId = btn.dataset.deleteId;
+                if (confirm('Are you sure you want to delete this card?')) {
+                    await deleteProject(user.uid, cardId);
+                    const updated = await getProjects(user.uid);
+                    renderBoardColumns(updated);
+                }
+            });
+        });
+    }
 
     // Toggle Form Open/Close
     function toggleForm(open, isEdit = false) {
@@ -225,47 +347,8 @@ export function bindTrackerEvents() {
             }
 
             toggleForm(false);
-            window.dispatchEvent(new HashChangeEvent("hashchange"));
+            const updated = await getProjects(user.uid);
+            renderBoardColumns(updated);
         });
     }
-
-    // Handle Status Change via Dropdown Select
-    document.querySelectorAll('.card-status-select').forEach(select => {
-        select.addEventListener('change', async (e) => {
-            const cardId = select.dataset.cardId;
-            const newStatus = select.value;
-            await updateProject(user.uid, { id: cardId, status: newStatus });
-            window.dispatchEvent(new HashChangeEvent("hashchange"));
-        });
-    });
-
-    // Handle Edit Card Button
-    document.querySelectorAll('.edit-card-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const cardId = btn.dataset.editId;
-            const projects = await getProjects(user.uid);
-            const card = projects.find(p => p.id === cardId);
-            if (card) {
-                document.getElementById('cardEditId').value = card.id;
-                document.getElementById('cardTitle').value = card.title || card.name || '';
-                document.getElementById('cardTech').value = card.techStack || card.tech || '';
-                document.getElementById('cardRepo').value = card.repoUrl || '';
-                document.getElementById('cardDeploy').value = card.deployUrl || '';
-                document.getElementById('cardStatus').value = card.status || 'To-Do';
-                document.getElementById('cardDesc').value = card.description || '';
-                toggleForm(true, true);
-            }
-        });
-    });
-
-    // Handle Delete Card Button
-    document.querySelectorAll('.delete-card-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const cardId = btn.dataset.deleteId;
-            if (confirm('Are you sure you want to delete this card?')) {
-                await deleteProject(user.uid, cardId);
-                window.dispatchEvent(new HashChangeEvent("hashchange"));
-            }
-        });
-    });
 }

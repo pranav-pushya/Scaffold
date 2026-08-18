@@ -1,108 +1,86 @@
-# PBE-I Workflow — Detailed Day-by-Day Audit Report
+# PBE-I Workflow — Verified Codebase Audit Report
 
 **Project Name**: Scaffold (`</S>caffold`)  
-**Architecture**: Single Page Application (Vanilla JS + Vite + Firebase + reCAPTCHA)  
+**Architecture**: Single Page Application (Vanilla JS + Vite + Firebase Auth & Firestore + Groq AI API)  
 **Team**: Tiksha (Lead), Tammana, Pranav  
-**Audit Date**: August 11, 2026  
-**Overall Completion**: **95% Complete** (Production Code Complete, Pending Live Credentials)
+**Audit Date**: August 18, 2026  
+**Overall Status**: **Verified Working & Synchronized with Real SDKs**
 
 ---
 
 ## Executive Summary
 
-| Phase / Day | Planned Scope | Status | Verification & Code Locations |
+| Architectural Module | Planned Scope | Status | Verification & Code Locations |
 | :--- | :--- | :---: | :--- |
-| **Day 1 — Setup** | Firebase Services, Router Skeleton, Design Tokens | **DONE** | `firebase/`, `js/router.js`, `styles/themes.css` |
-| **Day 2 — Schema & Boot** | `SCHEMA.md`, Stores, Boot Terminal, Login Layout | **DONE** | `docs/SCHEMA.md`, `js/store/`, `js/pages/boot/` |
-| **Day 3 — Captcha & Auth** | reCAPTCHA widget, Email Auth, Navbar/Footer | **DONE** | `js/pages/login/captcha.js`, `js/components/` |
-| **Day 4 — OAuth & Guard** | Google SSO, Protected Routes, Logout, Home UI | **DONE** | `js/components/protectedRoute.js`, `js/pages/home/` |
-| **Day 5 — Theme Engine** | Multi-theme switcher, LocalStorage, Keybindings | **DONE** | `js/theme/themeManager.js`, `styles/themes.css` |
-| **Day 6 — Profile Module** | Profile Form, Firestore Read/Write, Validation | **DONE** | `js/pages/profile/`, `firebase/firestoreService.js` |
-| **Day 7 — Dashboard/Tracker**| Hub Cards, Project CRUD (Add/Delete), Tracker UI | **DONE** | `js/pages/dashboard/`, `js/pages/tracker/` |
-| **Day 8 — Integration** | End-to-End SPA Flow (#boot → #login → #dashboard) | **DONE** | Integrated in `js/router.js` |
-| **Day 9 — Polish & Responsive**| Form edge-cases, error toasts, mobile layouts | **DONE** | `styles/globals.css`, `login.js`, `profile.js` |
-| **Day 10 — Presentation** | Documentation, Viva readiness & code isolation | **DONE** | Modular file separation per team member |
+| **1. Firebase Authentication** | Email/Password & Google SSO via real Firebase SDK | **DONE** | Verified in `firebase/authService.js` calling real `createUserWithEmailAndPassword`, `signInWithEmailAndPassword`, `signInWithPopup` (`GoogleAuthProvider`), `signOut`, and `onAuthStateChanged`. |
+| **2. Firestore Service Layer** | Profile & Project CRUD with forced long-polling | **DONE** | Verified in `firebase/firestoreService.js` & `firebaseConfig.js`. Uses `initializeFirestore` with `experimentalForceLongPolling: true`. Standardized collection path: `profiles/{userId}` & `profiles/{userId}/projects`. |
+| **3. Security Check (Captcha)** | Client-side Math Captcha challenge widget | **DONE** | Verified in `js/pages/login/captcha.js`. Client-side arithmetic challenge (`num1 + num2`) labeled as `SECURITY CHECK`. (Not Google's reCAPTCHA). |
+| **4. Groq AI Engine** | Context-aware LLM Assistant for career & code | **DONE** | Verified in `js/pages/assistant/assistant.js`. Uses Groq Cloud API (`https://api.groq.com/openai/v1/chat/completions`), active `openai/gpt-oss-20b` model, and `VITE_GROQ_API_KEY`. Zero xAI/Grok references remaining. |
+| **5. Firestore Security Rules** | Database read/write access control | **PARTIAL** | Database rules remain in **Test Mode** (open access). Client application isolates user paths (`profiles/{userId}`), but database-enforced security rules are not yet configured in `firestore.rules`. |
+| **6. SPA Router & Async Hydration** | Non-blocking page navigation & safe timeouts | **DONE** | Verified in `js/router.js` and all page modules (`profile.js`, `dashboard.js`, `tracker.js`, `portfolio.js`, `resume.js`, `assistant.js`). Instant skeleton render + non-blocking 20s timeout margin (`fetchWithTimeout`) with soft loading notice progression. |
+| **7. Production Deployment** | Live hosting on Firebase Hosting | **PENDING** | App currently runs locally via Vite (`npm run dev`). Deployment to Firebase Hosting (`firebase.json` target) is pending. |
 
 ---
 
 ## Detailed Task-by-Task Audit
 
-### 🟢 Day 1 — Setup (Parallel Start)
-- [x] **Pranav**: Initialize Firebase project abstraction.
-  - *Status*: **DONE**. Configured in `firebase/firebaseConfig.js`.
-- [x] **Pranav**: Write `authService.js` and `firestoreService.js`.
-  - *Status*: **DONE**. Functions `loginWithEmail`, `signUpWithEmail`, `loginWithGoogle`, `logoutUser`, `saveProfile`, `getProfile`, `saveProject`, `deleteProject` created in `firebase/`.
-- [x] **Tiksha**: Folder structure & CSS design system tokens.
-  - *Status*: **DONE**. `styles/themes.css` defines `:root[data-theme="dark"]`, `:root[data-theme="light"]`, and `:root[data-theme="cyber"]`.
-- [x] **Tammana**: Build `js/router.js` hash routing skeleton.
-  - *Status*: **DONE**. Hash router implemented in `js/router.js`.
+### 🟢 1. Firebase Authentication (`firebase/authService.js`)
+- [x] **Email & Password Authentication**:
+  - *Status*: **DONE**. `loginWithEmail` and `signUpWithEmail` directly invoke Firebase Auth SDK functions (`signInWithEmailAndPassword` and `createUserWithEmailAndPassword`).
+- [x] **Google Single Sign-On (SSO)**:
+  - *Status*: **DONE**. `loginWithGoogle` uses real `signInWithPopup(auth, new GoogleAuthProvider())`.
+- [x] **Session State Management**:
+  - *Status*: **DONE**. `onAuthStateChanged` maintains active user state; `logoutUser` invokes `signOut(auth)`.
 
 ---
 
-### 🟢 Day 2 — Schema + Boot Screen
-- [x] **Pranav**: Write `docs/SCHEMA.md`.
-  - *Status*: **DONE**. Documented Firestore collections `users` and subcollection `projects` in `docs/SCHEMA.md`.
-- [x] **Pranav**: Build local cache stores `profileStore.js` and `trackerStore.js`.
-  - *Status*: **DONE**. Created `js/store/profileStore.js` and `js/store/trackerStore.js`.
-- [x] **Pranav & Tiksha**: Boot screen terminal typing logic & CSS.
-  - *Status*: **DONE**. Implemented in `js/pages/boot/boot.js` and `js/pages/boot/boot.css`.
-- [x] **Tammana & Tiksha**: Login page split layout structure.
-  - *Status*: **DONE**. Implemented in `js/pages/login/login.js` and `login.css`.
+### 🟢 2. Firestore Database Integration (`firebase/firestoreService.js` & `firebaseConfig.js`)
+- [x] **Connection Stability**:
+  - *Status*: **DONE**. `firebaseConfig.js` initializes Firestore via `initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false })` to guarantee connectivity over restrictive networks.
+- [x] **Collection Path Consistency**:
+  - *Status*: **DONE**. Resolved prior collection path mismatch. `saveProfile` writes to `profiles/{userId}`, and all project methods (`saveProject`, `getProjects`, `updateProject`, `deleteProject`) consistently read/write to the `profiles/{userId}/projects` subcollection.
+- [x] **Firestore CRUD Operations**:
+  - *Status*: **DONE**. Direct integration with `doc`, `setDoc`, `getDoc`, `collection`, `addDoc`, `getDocs`, `updateDoc`, and `deleteDoc`.
 
 ---
 
-### 🟢 Day 3 — Captcha + Auth Wiring
-- [x] **Pranav**: Integrate Security Captcha widget wrapper.
-  - *Status*: **DONE**. Math challenge verification widget built in `js/pages/login/captcha.js`.
-- [x] **Tammana**: Signup/Login form submit logic calling `authService`.
-  - *Status*: **DONE**. Wired form submit handler in `js/pages/login/login.js`.
-- [x] **Tiksha**: Navbar & Footer components.
-  - *Status*: **DONE**. Component templates implemented in `js/components/navbar.js` and `js/components/footer.js`.
+### 🟢 3. Security Check Captcha (`js/pages/login/captcha.js`)
+- [x] **Client-Side Math Captcha Widget**:
+  - *Status*: **DONE**. Dynamically generates a single-digit arithmetic challenge (`num1 + num2`) to prevent automated form submission.
+- [x] **UI Labeling**:
+  - *Status*: **DONE**. Labeled as `SECURITY CHECK` in the login interface to accurately reflect its custom client-side nature. *(Explicitly not Google's reCAPTCHA service)*.
 
 ---
 
-### 🟢 Day 4 — Google Login + Protected Routes
-- [x] **Pranav & Tammana**: Google SSO & Logout integration.
-  - *Status*: **DONE**. `loginWithGoogle()` wired to Google Auth button; `logoutUser()` wired to Navbar button.
-- [x] **Pranav & Tammana**: Protected Route Guard (`protectedRoute.js`).
-  - *Status*: **DONE**. `requireAuth()` blocks unauthenticated access to `#dashboard`, `#profile`, and `#tracker`, redirecting users to `#login`.
-- [x] **Tiksha**: Home page content & scroll reveal animation.
-  - *Status*: **DONE**. Hero section, typewriter animation, and scroll reveal built in `js/pages/home/home.js`.
+### 🟢 4. Groq AI Assistant Engine (`js/pages/assistant/assistant.js`)
+- [x] **Groq Cloud API Endpoint**:
+  - *Status*: **DONE**. Calls `https://api.groq.com/openai/v1/chat/completions` using environment variable `VITE_GROQ_API_KEY`.
+- [x] **Active Model**:
+  - *Status*: **DONE**. Configured to use the verified active Groq model `openai/gpt-oss-20b`.
+- [x] **Context Awareness & Clean UI**:
+  - *Status*: **DONE**. Asynchronously feeds user Profile OS data and Kanban projects into the system prompt. All UI branding strictly references "Groq AI Engine".
 
 ---
 
-### 🟢 Day 5 — Theme System
-- [x] **Pranav**: `themeManager.js` with `localStorage` persistence and `data-theme` attribute toggling.
-  - *Status*: **DONE**. Created `js/theme/themeManager.js`.
-- [x] **Tiksha & Tammana**: Multi-theme switch buttons & keyboard shortcut.
-  - *Status*: **DONE**. Theme buttons in navbar toggle themes; pressing `T` cycles through `dark`, `light`, and `cyber` themes dynamically.
+### 🟡 5. Firestore Security Rules
+- [ ] **Database-Level Access Control**:
+  - *Status*: **PARTIAL**. The Firebase project currently operates under **Test Mode** rules. While application code isolates data by UID (`profiles/{userId}`), per-user database rules in `firestore.rules` are not yet enforced at the Firebase backend layer.
 
 ---
 
-### 🟢 Day 6 — Profile Page
-- [x] **Pranav & Tammana**: Profile form Firestore integration (`saveProfile`, `getProfile`).
-  - *Status*: **DONE**. Built controlled inputs for Full Name, Bio, Skills, Education, and Career Goal in `js/pages/profile/profile.js`.
-- [x] **Tiksha**: Profile page visual styling and toast notifications.
-  - *Status*: **DONE**. Save notification toast and form layout styled in `profile.css`.
+### 🟢 6. Router & Non-Blocking Async Hydration (`js/router.js` & Page Modules)
+- [x] **Non-Blocking SPA Rendering**:
+  - *Status*: **DONE**. Routing in `js/router.js` renders navigation, navbar, and page skeleton HTML immediately without awaiting network requests.
+- [x] **Resilient Data Hydration**:
+  - *Status*: **DONE**. `profile.js`, `dashboard.js`, `tracker.js`, `portfolio.js`, `resume.js`, and `assistant.js` fetch Firestore data asynchronously using `fetchWithTimeout` (20s margin), display progressive soft loading notices, and immediately clear status banners as soon as data arrives.
 
 ---
 
-### 🟢 Day 7 — Dashboard + Tracker Skeleton
-- [x] **Pranav**: Tracker store CRUD logic (Add, List, Delete projects).
-  - *Status*: **DONE**. Project CRUD operations implemented in `js/store/trackerStore.js` and `firebase/firestoreService.js`.
-- [x] **Tammana & Tiksha**: Dashboard Hub cards & Tracker UI table.
-  - *Status*: **DONE**. Dashboard rendered in `js/pages/dashboard/dashboard.js`; Project table with live add/delete rendered in `js/pages/tracker/tracker.js`.
-
----
-
-### 🟢 Day 8, 9 & 10 — Integration, Polish & Presentation Prep
-- [x] **All Team Members**: End-to-end SPA route flow (`#boot` → `#login` → `#home` → `#dashboard` → `#profile` → `#tracker`).
-  - *Status*: **DONE**. Route lifecycle fully handled by `js/router.js` and `index.html`.
-- [x] **Form validation & Toast Feedback**: Empty field prevention, captcha check, error messages.
-  - *Status*: **DONE**. Validation implemented across login, profile, and tracker forms.
-- [⏳] **Pending Final Action**: Replace placeholder API key string in `firebase/firebaseConfig.js` with your active team Firebase project credentials.
+### 🔴 7. Deployment Status
+- [ ] **Firebase Hosting Deployment**:
+  - *Status*: **PENDING**. Application is fully functional locally on Vite (`http://localhost:5173`). Production build and `firebase deploy` to Firebase Hosting are pending final release execution.
 
 ---
 
 ## Conclusion
-The **Scaffold** application fulfills 100% of the functional coding requirements defined in `PBE-1_Workflow.md` and respects the folder architecture of `structure.md`.
+The **Scaffold** developer platform codebase has been thoroughly audited and verified. All client logic, Firebase SDK operations, and Groq AI integrations are fully functional, traceably wired, and decoupled from blocking network bottlenecks.

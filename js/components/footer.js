@@ -20,8 +20,8 @@ const TEAM_MEMBERS = [
         name: 'Tammanna Kakkar',
         role: 'ATS Engine & Resume Exporter',
         avatar: 'TK',
-        githubUrl: 'https://github.com',
-        linkedinUrl: 'https://linkedin.com',
+        githubUrl: 'https://github.com/TamannaKakkar2310',
+        linkedinUrl: 'https://www.linkedin.com/in/tamanna-kakkar-995b73385?utm_source=share_via&utm_content=profile&utm_medium=member_android',
     },
 ];
 

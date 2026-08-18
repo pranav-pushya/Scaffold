@@ -1,46 +1,12 @@
 // === DASHBOARD PAGE ===
-// Dynamic developer dashboard matching reference architecture
+// Dynamic developer dashboard matching reference architecture with non-blocking initial rendering
 
 import { getCurrentAuthUser } from '../../../firebase/authService.js';
-import { getProfile, getProjects } from '../../../firebase/firestoreService.js';
+import { getProfile, getProjects, fetchWithTimeout } from '../../../firebase/firestoreService.js';
 
-export async function renderDashboardPage() {
+export function renderDashboardPage() {
     const user = getCurrentAuthUser() || { displayName: 'Developer', email: '', uid: 'demo' };
-    const profile = await getProfile(user.uid) || {};
-    const projects = await getProjects(user.uid) || [];
-
-    // Calculate real Profile Readiness & ATS Score
-    const profileFields = [
-        profile.fullName, profile.email, profile.phone, profile.location,
-        profile.targetRole, profile.bio, profile.coreLanguages, profile.frameworks,
-        profile.devTools, profile.degree, profile.institution, profile.githubUrl,
-        profile.linkedinUrl, profile.experience
-    ];
-    const filledCount = profileFields.filter(Boolean).length;
-    const readinessPercent = Math.round((filledCount / profileFields.length) * 100);
-
-    // ATS Score heuristic based on completed fields & logged projects
-    let atsScore = Math.round((readinessPercent * 0.75) + (projects.length >= 1 ? 15 : 0) + (projects.length >= 3 ? 10 : 0));
-    if (atsScore > 100) atsScore = 100;
-
-    let gradeText = 'Grade D • Needs Work';
-    let gradeColor = '#ef4444';
-    if (atsScore >= 80) { gradeText = 'Grade A • Excellent'; gradeColor = '#10b981'; }
-    else if (atsScore >= 60) { gradeText = 'Grade B • Good'; gradeColor = '#3b82f6'; }
-    else if (atsScore >= 40) { gradeText = 'Grade C • Fair'; gradeColor = '#f59e0b'; }
-
-    // Project statistics
-    const totalProjects = projects.length;
-    const inProgressProjects = projects.filter(p => (p.status || '').toLowerCase().includes('progress')).length;
-    const completedProjects = projects.filter(p => {
-        const s = (p.status || '').toLowerCase();
-        return s.includes('done') || s.includes('complete');
-    }).length;
-    const activeTasks = projects.filter(p => (p.status || '').toLowerCase().includes('progress'));
-
-    const userName = profile.fullName || user.displayName || 'Developer';
-    const userRole = profile.targetRole || 'Software Engineer & Developer';
-    const expLevel = profile.experienceLevel || 'Beginner';
+    const userName = user.displayName || 'Developer';
 
     return `
     <div class="dashboard-wrapper max-w-7xl mx-auto space-y-6">
@@ -53,20 +19,22 @@ export async function renderDashboardPage() {
                 style="background: var(--card); border-color: var(--border-strong);">
                 <div class="space-y-4">
                     <div class="flex items-center gap-3 flex-wrap">
-                        <h1 class="font-display font-black text-3xl md:text-4xl" style="color: var(--fg);">
+                        <h1 id="dashUserName" class="font-display font-black text-3xl md:text-4xl" style="color: var(--fg);">
                             Welcome back, ${userName} 👋
                         </h1>
-                        <span class="px-3 py-1 rounded-full text-xs font-mono font-bold"
+                        <span id="dashExpBadge" class="px-3 py-1 rounded-full text-xs font-mono font-bold"
                             style="background: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3);">
-                            ${expLevel}
+                            Developer
                         </span>
                     </div>
 
-                    <h2 class="font-mono font-bold text-lg text-emerald-500">${userRole}</h2>
+                    <h2 id="dashUserRole" class="font-mono font-bold text-lg text-emerald-500">Software Engineer & Developer</h2>
 
                     <p class="text-sm text-muted leading-relaxed max-w-2xl">
                         Track your active deliverables, monitor profile readiness, inspect ATS score heuristics, and feature your verified portfolio accomplishments.
                     </p>
+
+                    <div id="dashStatusNotice" class="font-mono text-xs hidden p-2 rounded border" style="background: var(--card); border-color: var(--border);"></div>
                 </div>
 
                 <div class="pt-6 mt-6 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -74,10 +42,10 @@ export async function renderDashboardPage() {
                     <div class="w-full sm:w-auto flex-1 max-w-xs space-y-1.5">
                         <div class="flex justify-between text-xs font-mono">
                             <span class="text-muted">Profile Readiness:</span>
-                            <span class="font-bold text-emerald-500">${readinessPercent}%</span>
+                            <span id="dashReadinessText" class="font-bold text-emerald-500">0%</span>
                         </div>
                         <div class="w-full h-2 rounded-full overflow-hidden" style="background: var(--border);">
-                            <div class="h-full bg-emerald-500 transition-all duration-500" style="width: ${readinessPercent}%;"></div>
+                            <div id="dashReadinessBar" class="h-full bg-emerald-500 transition-all duration-500" style="width: 0%;"></div>
                         </div>
                     </div>
 
@@ -101,22 +69,22 @@ export async function renderDashboardPage() {
                     </div>
 
                     <div class="py-2">
-                        <div class="font-mono font-extrabold text-5xl md:text-6xl" style="color: var(--fg);">
-                            ${atsScore}<span class="text-2xl text-muted font-normal">/100</span>
+                        <div id="dashAtsScore" class="font-mono font-extrabold text-5xl md:text-6xl" style="color: var(--fg);">
+                            0<span class="text-2xl text-muted font-normal">/100</span>
                         </div>
                     </div>
 
                     <div>
-                        <span class="inline-block px-3 py-1 rounded-full text-xs font-mono font-bold"
-                            style="background: rgba(239, 68, 68, 0.1); color: ${gradeColor}; border: 1px solid ${gradeColor}40;">
-                            ${gradeText}
+                        <span id="dashAtsBadge" class="inline-block px-3 py-1 rounded-full text-xs font-mono font-bold"
+                            style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef444440;">
+                            Grade D • Needs Work
                         </span>
                     </div>
                 </div>
 
                 <div class="pt-6 mt-6 border-t space-y-3" style="border-color: var(--border);">
-                    <p class="text-xs text-muted leading-relaxed">
-                        ${readinessPercent < 100 ? 'Add your professional email, bio, and city/country location for employer ATS indexing.' : 'Your profile is fully optimized for employer ATS indexing!'}
+                    <p id="dashAtsHint" class="text-xs text-muted leading-relaxed">
+                        Add your professional email, bio, and city/country location for employer ATS indexing.
                     </p>
                     <a href="#profile" class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-500 hover:underline">
                         View Full Audit →
@@ -133,7 +101,7 @@ export async function renderDashboardPage() {
                 style="background: var(--card); border-color: var(--border-strong);">
                 <div class="space-y-1">
                     <div class="font-mono text-xs font-bold uppercase tracking-wider text-muted">TOTAL PROJECTS</div>
-                    <div class="font-mono font-extrabold text-3xl" style="color: var(--fg);">${totalProjects}</div>
+                    <div id="dashTotalProjects" class="font-mono font-extrabold text-3xl" style="color: var(--fg);">0</div>
                     <div class="text-xs text-muted">Across all Kanban columns</div>
                 </div>
                 <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"
@@ -146,7 +114,7 @@ export async function renderDashboardPage() {
                 style="background: var(--card); border-color: var(--border-strong);">
                 <div class="space-y-1">
                     <div class="font-mono text-xs font-bold uppercase tracking-wider text-emerald-500">IN PROGRESS</div>
-                    <div class="font-mono font-extrabold text-3xl text-emerald-500">${inProgressProjects}</div>
+                    <div id="dashInProgressProjects" class="font-mono font-extrabold text-3xl text-emerald-500">0</div>
                     <div class="text-xs text-muted">Active deliverables</div>
                 </div>
                 <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"
@@ -159,7 +127,7 @@ export async function renderDashboardPage() {
                 style="background: var(--card); border-color: var(--border-strong);">
                 <div class="space-y-1">
                     <div class="font-mono text-xs font-bold uppercase tracking-wider text-blue-500">COMPLETED</div>
-                    <div class="font-mono font-extrabold text-3xl text-blue-500">${completedProjects}</div>
+                    <div id="dashCompletedProjects" class="font-mono font-extrabold text-3xl text-blue-500">0</div>
                     <div class="text-xs text-muted">Verified in Portfolio</div>
                 </div>
                 <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"
@@ -178,27 +146,18 @@ export async function renderDashboardPage() {
                 style="background: var(--card); border-color: var(--border-strong);">
                 <div class="flex items-center justify-between">
                     <h3 class="font-display font-bold text-lg flex items-center gap-2" style="color: var(--fg);">
-                        ⚡ Active Tasks (${inProgressProjects})
+                        ⚡ Active Tasks (<span id="dashActiveTaskCount">0</span>)
                     </h3>
                     <a href="#tracker" class="text-xs font-bold text-emerald-500 hover:underline">
                         Open Board →
                     </a>
                 </div>
 
-                ${activeTasks.length ? `
-                    <div class="space-y-2">
-                        ${activeTasks.map(t => `
-                            <div class="p-3 rounded-lg border flex items-center justify-between text-xs" style="border-color: var(--border); background: rgba(var(--accent-rgb), 0.02);">
-                                <span class="font-bold" style="color: var(--fg);">${t.title || t.name}</span>
-                                <span class="font-mono text-[10px] text-emerald-500">${t.techStack || t.tech || 'In Progress'}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                ` : `
+                <div id="dashActiveTasksList">
                     <div class="p-8 rounded-xl border border-dashed text-center text-xs text-muted" style="border-color: var(--border);">
-                        No tasks currently in progress.
+                        Loading active deliverables...
                     </div>
-                `}
+                </div>
             </div>
 
             <!-- Right: AI Career Coach -->
@@ -214,7 +173,7 @@ export async function renderDashboardPage() {
                 </div>
 
                 <p class="text-xs text-muted leading-relaxed">
-                    Get personalized project ideas, skill gap analysis, and ATS optimization advice tailored to your career target (<strong style="color: var(--fg);">${userRole}</strong>).
+                    Get personalized project ideas, skill gap analysis, and ATS optimization advice tailored to your target engineering role.
                 </p>
 
                 <div class="p-3 rounded-xl flex items-center justify-between gap-3 text-xs"
@@ -240,7 +199,7 @@ export async function renderDashboardPage() {
                     </div>
                     <div>
                         <h4 class="font-display font-bold text-base" style="color: var(--fg);">Portfolio Showcase</h4>
-                        <p class="text-xs text-muted">${completedProjects} verified projects ready to share</p>
+                        <p id="dashPortfolioSub" class="text-xs text-muted">0 verified projects ready to share</p>
                     </div>
                 </div>
                 <a href="#portfolio" class="text-xs font-bold text-emerald-500 hover:underline shrink-0">
@@ -274,7 +233,7 @@ export async function renderDashboardPage() {
         <div class="p-6 rounded-2xl max-w-lg w-full mx-4 shadow-2xl space-y-4 border" style="background: var(--card); border-color: var(--border-strong);">
             <div class="flex items-center justify-between border-b pb-3" style="border-color: var(--border);">
                 <h3 class="font-display font-bold text-lg flex items-center gap-2" style="color: var(--fg);">
-                    💡 AI Recommended Projects for ${userRole}
+                    💡 AI Recommended Engineering Projects
                 </h3>
                 <button type="button" id="closeIdeasBtn" class="text-muted hover:text-fg text-lg">&times;</button>
             </div>
@@ -321,5 +280,134 @@ export function bindDashboardEvents() {
         closeIdeasBtn.addEventListener('click', () => {
             ideasModal.classList.add('opacity-0', 'pointer-events-none');
         });
+    }
+
+    const user = getCurrentAuthUser() || { displayName: 'Developer', uid: 'demo' };
+    const statusNotice = document.getElementById('dashStatusNotice');
+
+    // Intermediate 3s soft loading notice
+    const slowTimer = setTimeout(() => {
+        if (statusNotice && !statusNotice.classList.contains('hidden')) {
+            statusNotice.innerHTML = `<span class="text-amber-400"><i class="fas fa-circle-notch fa-spin mr-1"></i> Still loading, this may take a moment on slow connections...</span>`;
+        }
+    }, 3000);
+
+    // 20s soft timeout notice
+    const softTimeoutTimer = setTimeout(() => {
+        if (statusNotice && !statusNotice.classList.contains('hidden')) {
+            statusNotice.innerHTML = `<span class="text-amber-400"><i class="fas fa-circle-notch fa-spin mr-1"></i> Still establishing Firestore connection...</span>`;
+        }
+    }, 20000);
+
+    // Asynchronously fetch Profile & Projects in parallel with 20-second Promise.race() timeout
+    Promise.all([
+        fetchWithTimeout(getProfile(user.uid), 20000),
+        fetchWithTimeout(getProjects(user.uid), 20000)
+    ]).then(([profile, projects]) => {
+        clearTimeout(slowTimer);
+        clearTimeout(softTimeoutTimer);
+        if (!profile) profile = {};
+        if (!projects) projects = [];
+
+        if (statusNotice) statusNotice.classList.add('hidden');
+
+        // 1. Update Name & Role
+        const userName = profile.fullName || user.displayName || 'Developer';
+        const userRole = profile.targetRole || 'Software Engineer & Developer';
+        const expLevel = profile.expLevel || 'Beginner';
+
+        setText('dashUserName', `Welcome back, ${userName} 👋`);
+        setText('dashUserRole', userRole);
+        setText('dashExpBadge', expLevel);
+
+        // 2. Readiness calculation
+        const profileFields = [
+            profile.fullName, profile.email, profile.phone, profile.location,
+            profile.targetRole, profile.bio, profile.coreLanguages, profile.frameworks,
+            profile.devTools, profile.degree, profile.institution, profile.githubUrl,
+            profile.linkedinUrl, profile.experience
+        ];
+        const filledCount = profileFields.filter(Boolean).length;
+        const readinessPercent = Math.round((filledCount / profileFields.length) * 100);
+
+        setText('dashReadinessText', `${readinessPercent}%`);
+        const bar = document.getElementById('dashReadinessBar');
+        if (bar) bar.style.width = `${readinessPercent}%`;
+
+        // 3. ATS Score Calculation
+        let atsScore = Math.round((readinessPercent * 0.75) + (projects.length >= 1 ? 15 : 0) + (projects.length >= 3 ? 10 : 0));
+        if (atsScore > 100) atsScore = 100;
+
+        let gradeText = 'Grade D • Needs Work';
+        let gradeColor = '#ef4444';
+        if (atsScore >= 80) { gradeText = 'Grade A • Excellent'; gradeColor = '#10b981'; }
+        else if (atsScore >= 60) { gradeText = 'Grade B • Good'; gradeColor = '#3b82f6'; }
+        else if (atsScore >= 40) { gradeText = 'Grade C • Fair'; gradeColor = '#f59e0b'; }
+
+        const atsEl = document.getElementById('dashAtsScore');
+        if (atsEl) atsEl.innerHTML = `${atsScore}<span class="text-2xl text-muted font-normal">/100</span>`;
+        
+        const badgeEl = document.getElementById('dashAtsBadge');
+        if (badgeEl) {
+            badgeEl.innerText = gradeText;
+            badgeEl.style.color = gradeColor;
+            badgeEl.style.borderColor = `${gradeColor}40`;
+        }
+
+        const hintEl = document.getElementById('dashAtsHint');
+        if (hintEl) {
+            hintEl.innerText = readinessPercent < 100 ? 'Add your professional email, bio, and city/country location for employer ATS indexing.' : 'Your profile is fully optimized for employer ATS indexing!';
+        }
+
+        // 4. Project Metrics
+        const totalProjects = projects.length;
+        const inProgressProjects = projects.filter(p => (p.status || '').toLowerCase().includes('progress')).length;
+        const completedProjects = projects.filter(p => {
+            const s = (p.status || '').toLowerCase();
+            return s.includes('done') || s.includes('complete');
+        }).length;
+        const activeTasks = projects.filter(p => (p.status || '').toLowerCase().includes('progress'));
+
+        setText('dashTotalProjects', totalProjects);
+        setText('dashInProgressProjects', inProgressProjects);
+        setText('dashCompletedProjects', completedProjects);
+        setText('dashActiveTaskCount', inProgressProjects);
+        setText('dashPortfolioSub', `${completedProjects} verified projects ready to share`);
+
+        // Render Active Tasks
+        const tasksContainer = document.getElementById('dashActiveTasksList');
+        if (tasksContainer) {
+            if (activeTasks.length) {
+                tasksContainer.innerHTML = `
+                    <div class="space-y-2">
+                        ${activeTasks.map(t => `
+                            <div class="p-3 rounded-lg border flex items-center justify-between text-xs" style="border-color: var(--border); background: rgba(var(--accent-rgb), 0.02);">
+                                <span class="font-bold" style="color: var(--fg);">${t.title || t.name}</span>
+                                <span class="font-mono text-[10px] text-emerald-500">${t.techStack || t.tech || 'In Progress'}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                tasksContainer.innerHTML = `
+                    <div class="p-8 rounded-xl border border-dashed text-center text-xs text-muted" style="border-color: var(--border);">
+                        No tasks currently in progress.
+                    </div>
+                `;
+            }
+        }
+    }).catch(err => {
+        clearTimeout(slowTimer);
+        clearTimeout(softTimeoutTimer);
+        console.error('Dashboard Firestore sync ACTUAL ERROR object:', err);
+        if (statusNotice) {
+            statusNotice.classList.remove('hidden');
+            statusNotice.innerHTML = `<span class="text-amber-400">⚠️ Unable to sync live Firestore data — ${err.message || err}.</span>`;
+        }
+    });
+
+    function setText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = text;
     }
 }

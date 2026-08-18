@@ -1,5 +1,5 @@
 // === SPA ROUTER ===
-// Hash-based client router handling page transitions, auth guards & component mounting
+// Hash-based client router handling page transitions, auth guards & component mounting with error boundaries
 
 import { renderNavbar, bindNavbarEvents } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
@@ -11,7 +11,7 @@ import { renderLoginPage, bindLoginEvents } from './pages/login/login.js';
 import { renderDashboardPage, bindDashboardEvents } from './pages/dashboard/dashboard.js';
 import { renderProfilePage, bindProfileEvents } from './pages/profile/profile.js';
 import { renderTrackerPage, bindTrackerEvents } from './pages/tracker/tracker.js';
-import { renderPortfolioPage } from './pages/portfolio/portfolio.js';
+import { renderPortfolioPage, bindPortfolioEvents } from './pages/portfolio/portfolio.js';
 import { renderResumePage, bindResumeEvents } from './pages/resume/resume.js';
 import { renderAssistantPage, bindAssistantEvents } from './pages/assistant/assistant.js';
 
@@ -22,7 +22,7 @@ const routes = {
     '#dashboard': { render: renderDashboardPage, bind: bindDashboardEvents, protected: true },
     '#profile': { render: renderProfilePage, bind: bindProfileEvents, protected: true },
     '#tracker': { render: renderTrackerPage, bind: bindTrackerEvents, protected: true },
-    '#portfolio': { render: renderPortfolioPage, bind: null, protected: true },
+    '#portfolio': { render: renderPortfolioPage, bind: bindPortfolioEvents, protected: true },
     '#resume': { render: renderResumePage, bind: bindResumeEvents, protected: true },
     '#assistant': { render: renderAssistantPage, bind: bindAssistantEvents, protected: true },
 };
@@ -43,9 +43,24 @@ export async function handleRouting() {
         return; // Guard redirects to #login
     }
 
-    // Render HTML layout
-    const contentHtml = await route.render();
-    
+    // Render HTML layout with try-catch error boundary to prevent unhandled rejection crashes
+    let contentHtml = '';
+    try {
+        contentHtml = await route.render();
+    } catch (err) {
+        console.error('Error rendering route content:', err);
+        contentHtml = `
+            <div class="p-8 text-center max-w-md mx-auto space-y-4 font-mono text-xs">
+                <div class="text-3xl text-amber-500">⚠️</div>
+                <h2 class="font-display font-bold text-lg" style="color: var(--fg);">Route Render Warning</h2>
+                <p class="text-muted leading-relaxed">
+                    An error occurred while fetching page data. Page shell rendered successfully.
+                </p>
+                <p class="text-[11px] text-red-400 font-mono">${err.message || 'Data fetch failed.'}</p>
+            </div>
+        `;
+    }
+
     // Boot screen renders full screen as the loader without navbar/footer
     if (hash === '#boot') {
         appEl.innerHTML = contentHtml;
@@ -60,9 +75,13 @@ export async function handleRouting() {
         bindNavbarEvents();
     }
 
-    // Bind event handlers
+    // Bind event handlers safely
     if (route.bind) {
-        route.bind();
+        try {
+            route.bind();
+        } catch (err) {
+            console.error('Error binding route events:', err);
+        }
     }
 
     window.scrollTo(0, 0);

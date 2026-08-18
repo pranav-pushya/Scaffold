@@ -75,27 +75,20 @@ export function renderHomePage() {
     <!-- Marquee -->
     <div class="py-5 border-y marquee-wrap" style="border-color: var(--border); background: var(--bg-elev);">
         <div class="marquee font-mono text-sm uppercase tracking-widest flex gap-8" style="color: var(--muted);">
-            <span>Vanilla JS</span><span>·</span><span>Firebase Auth</span><span>·</span><span>Firestore</span><span>·</span><span>reCAPTCHA</span><span>·</span><span>Vite</span><span>·</span><span>Tailwind CSS</span><span>·</span><span>Theme Engine</span><span>·</span><span>SPA Router</span><span>·</span>
-            <span>Vanilla JS</span><span>·</span><span>Firebase Auth</span><span>·</span><span>Firestore</span><span>·</span><span>reCAPTCHA</span><span>·</span><span>Vite</span><span>·</span><span>Tailwind CSS</span><span>·</span><span>Theme Engine</span><span>·</span><span>SPA Router</span><span>·</span>
+            <span>Vanilla JS</span><span>·</span><span>Firebase Auth</span><span>·</span><span>Firestore</span><span>·</span><span>Security Check</span><span>·</span><span>Vite</span><span>·</span><span>Tailwind CSS</span><span>·</span><span>Theme Engine</span><span>·</span><span>SPA Router</span><span>·</span>
+            <span>Vanilla JS</span><span>·</span><span>Firebase Auth</span><span>·</span><span>Firestore</span><span>·</span><span>Security Check</span><span>·</span><span>Vite</span><span>·</span><span>Tailwind CSS</span><span>·</span><span>Theme Engine</span><span>·</span><span>SPA Router</span><span>·</span>
         </div>
     </div>
 
-    <!-- Platform Features Grid -->
-    <section class="py-24 px-6 max-w-7xl mx-auto">
-        <div class="mb-16">
-            <span class="tag mb-3 inline-block">Platform Architecture</span>
-            <h2 class="font-display font-black text-4xl">Core Engineering Modules</h2>
-        </div>
-
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="article-card">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="tag">Security</span>
-                    <i class="fas fa-user-shield text-amber-500 text-lg"></i>
-                </div>
-                <h3 class="font-display font-bold text-2xl mb-3">Auth & Captcha Guard</h3>
-                <p class="text-sm text-muted leading-relaxed mb-6">
-                    Multi-factor security flow integrating Email/Password, Google OAuth, and interactive reCAPTCHA validation.
+    <!-- Features Section -->
+    <section class="max-w-6xl mx-auto px-6 py-20">
+        <h2 class="font-display font-black text-3xl mb-12 text-center">Core Platform Features</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card space-y-3">
+                <i class="fas fa-user-lock text-3xl text-amber-500 mb-2"></i>
+                <h3 class="font-display font-bold text-lg">Firebase Auth System</h3>
+                <p class="text-xs text-muted leading-relaxed">
+                    Multi-factor security flow integrating Email/Password, Google OAuth, and interactive math Security Check validation.
                 </p>
                 <a href="#login" class="hover-link font-mono text-xs">Test Auth Portal →</a>
             </div>

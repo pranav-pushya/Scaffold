@@ -1,13 +1,13 @@
 # Scaffold — Developer Platform, Portfolio & AI Assistant Engine
 
-> A modular, high-contrast Single Page Application (SPA) built with **Vanilla JS**, **Vite**, **Firebase (Auth & Firestore)**, **xAI Grok API**, and **Vanilla CSS / Tailwind**. Built for developer career management, live portfolio generation, Kanban tracking, and AI-assisted engineering workflows.
+> A modular, high-contrast Single Page Application (SPA) built with **Vanilla JS**, **Vite**, **Firebase (Auth & Firestore)**, **Groq AI API**, and **Vanilla CSS / Tailwind**. Built for developer career management, live portfolio generation, Kanban tracking, and AI-assisted engineering workflows.
 
 ---
 
 ## 🌟 Key Features & Ecosystem
 
-- **🤖 Grok AI Career & Code Assistant (`#assistant`)**:
-  - Powered by **xAI Grok API** (`grok-2-latest`) with seamless `.env` API key retrieval (`VITE_GROK_API_KEY`).
+- **🤖 Groq AI Career & Code Assistant (`#assistant`)**:
+  - Powered by **Groq Cloud API** (`openai/gpt-oss-20b`) with seamless `.env` API key retrieval (`VITE_GROQ_API_KEY`).
   - Context-aware engine indexing user's real Profile OS fields and active Kanban projects.
   - Interactive modes: *ATS Career Coach*, *System Architect*, *Code Auditor*, and *Project Generator*.
   - Prompt shortcuts for ATS resume auditing, portfolio bio generation, and architecture prep.
@@ -47,7 +47,7 @@
 | Team Member             | Role                   | Key Contributions                                                                                                                     |
 | :---------------------- | :--------------------- | :------------------------------------------------------------------------------------------------------------------------------------ |
 | **Tiksha (Lead)** | UI/UX & Design System  | Theme tokens (`themes.css`), ClayGlass visual design system, mobile responsive layouts & styling.                                      |
-| **Pranav**        | Backend & Security     | Firebase Auth & Firestore isolation, `SCHEMA.md`, Grok AI Engine integration, state stores (`profileStore`, `trackerStore`), Security guards. |
+| **Pranav**        | Backend & Security     | Firebase Auth & Firestore isolation, `SCHEMA.md`, Groq AI Engine integration, state stores (`profileStore`, `trackerStore`), Security guards. |
 | **Tammana**       | Client Logic & Routing | SPA Hash Router (`router.js`), Login/Signup form handlers, Profile OS forms & ATS exporter view.                                     |
 
 ---
@@ -57,7 +57,7 @@
 ```
 scaffold/
 ├── index.html                           # SPA mount entry point
-├── .env                                 # Local environment variables (VITE_GROK_API_KEY)
+├── .env                                 # Local environment variables (VITE_GROQ_API_KEY)
 ├── .env.example                         # Environment template file
 ├── README.md                            # Documentation
 ├── docs/
@@ -100,9 +100,9 @@ scaffold/
    ```
 
 3. Configure Environment Variables:
-   Create a `.env` file in the root directory and insert your xAI Grok API key:
+   Create a `.env` file in the root directory and insert your Groq Cloud API key:
    ```env
-   VITE_GROK_API_KEY=your_xai_grok_key_here
+   VITE_GROQ_API_KEY=gsk_your_groq_api_key_here
    ```
 
 4. Start the development server:

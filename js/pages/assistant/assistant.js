@@ -1,17 +1,12 @@
 // === AI ASSISTANT PAGE ===
-// Interactive Developer & Career Assistant powered by Grok (xAI) API & Profile OS context
+// Interactive Developer & Career Assistant powered by Groq API & Profile OS context with non-blocking initial rendering
 
 import { getCurrentAuthUser } from '../../../firebase/authService.js';
-import { getProfile, getProjects } from '../../../firebase/firestoreService.js';
+import { getProfile, getProjects, fetchWithTimeout } from '../../../firebase/firestoreService.js';
 
-export async function renderAssistantPage() {
-    const user = getCurrentAuthUser() || { uid: 'demo' };
-    const profile = await getProfile(user.uid) || {};
-    const projects = await getProjects(user.uid) || [];
-
-    const userName = profile.fullName || user.displayName || 'Developer';
-    const userRole = profile.targetRole || 'Software Engineer';
-    const coreLangs = profile.coreLanguages || 'Web Technologies';
+export function renderAssistantPage() {
+    const user = getCurrentAuthUser() || { displayName: 'Developer', uid: 'demo' };
+    const userName = user.displayName || 'Developer';
 
     return `
     <div class="assistant-wrapper max-w-6xl mx-auto space-y-6">
@@ -22,12 +17,12 @@ export async function renderAssistantPage() {
             <div class="space-y-1">
                 <div class="flex items-center gap-2">
                     <span class="tag" style="background: rgba(16, 185, 129, 0.15); color: #059669; border-color: rgba(16, 185, 129, 0.3);">
-                        <i class="fas fa-brain mr-1"></i> Grok AI Engine (xAI)
+                        <i class="fas fa-brain mr-1"></i> Groq AI Engine
                     </span>
                 </div>
                 <h1 class="font-display font-black text-3xl" style="color: var(--fg);">AI Career & Code Assistant</h1>
-                <p class="text-xs text-muted font-mono">
-                    Powered by Grok API • Analyzing <strong style="color: var(--fg);">${userName}</strong> (${userRole}) • ${projects.length} project(s) indexed.
+                <p id="assistantSubHeader" class="text-xs text-muted font-mono">
+                    Powered by Groq API • Analyzing <strong id="astHeaderUserName" style="color: var(--fg);">${userName}</strong> (<span id="astHeaderUserRole">Software Engineer</span>) • <span id="astHeaderProjectCount">0</span> project(s) indexed.
                 </p>
             </div>
 
@@ -70,16 +65,16 @@ export async function renderAssistantPage() {
                             data-prompt="Audit my ATS resume readiness based on my filled profile fields and suggest missing keywords.">
                             <i class="fas fa-file-invoice text-emerald-500 mr-1.5"></i> Audit ATS Resume
                         </button>
-                        <button class="prompt-chip-btn w-full text-left p-2.5 rounded-lg border text-xs text-muted hover:text-fg transition-all"
-                            data-prompt="Suggest 3 advanced full-stack project ideas matching my core stack (${coreLangs}).">
+                        <button id="chipProjectIdeas" class="prompt-chip-btn w-full text-left p-2.5 rounded-lg border text-xs text-muted hover:text-fg transition-all"
+                            data-prompt="Suggest 3 advanced full-stack project ideas matching my core stack.">
                             <i class="fas fa-lightbulb text-amber-500 mr-1.5"></i> Generate Project Ideas
                         </button>
                         <button class="prompt-chip-btn w-full text-left p-2.5 rounded-lg border text-xs text-muted hover:text-fg transition-all"
                             data-prompt="Draft a compelling executive bio for my web portfolio page.">
                             <i class="fas fa-user-edit text-cyan-500 mr-1.5"></i> Write Portfolio Bio
                         </button>
-                        <button class="prompt-chip-btn w-full text-left p-2.5 rounded-lg border text-xs text-muted hover:text-fg transition-all"
-                            data-prompt="Give me system design interview prep tips tailored for a ${userRole}.">
+                        <button id="chipSystemDesign" class="prompt-chip-btn w-full text-left p-2.5 rounded-lg border text-xs text-muted hover:text-fg transition-all"
+                            data-prompt="Give me system design interview prep tips tailored for a Software Engineer.">
                             <i class="fas fa-network-wired text-purple-500 mr-1.5"></i> System Design Prep
                         </button>
                     </div>
@@ -87,10 +82,15 @@ export async function renderAssistantPage() {
 
                 <!-- User Context Summary Card -->
                 <div class="p-4 rounded-xl border space-y-2 font-mono text-xs text-muted" style="background: rgba(var(--accent-rgb), 0.02); border-color: var(--border);">
-                    <div class="font-bold text-fg">Active Context:</div>
-                    <div>• Name: <span class="text-emerald-500">${userName}</span></div>
-                    <div>• Target: <span class="text-emerald-500">${userRole}</span></div>
-                    <div>• Projects: <span class="text-emerald-500">${projects.length}</span></div>
+                    <div class="font-bold text-fg flex items-center justify-between">
+                        <span>Active Context:</span>
+                        <span id="astContextStatus" class="text-[10px] text-emerald-500 font-normal">
+                            <i class="fas fa-circle-notch fa-spin"></i> Syncing...
+                        </span>
+                    </div>
+                    <div>• Name: <span id="astCtxName" class="text-emerald-500">${userName}</span></div>
+                    <div>• Target: <span id="astCtxRole" class="text-emerald-500">Software Engineer</span></div>
+                    <div>• Projects: <span id="astCtxProjects" class="text-emerald-500">0</span></div>
                 </div>
 
             </div>
@@ -108,9 +108,9 @@ export async function renderAssistantPage() {
                             🤖
                         </div>
                         <div class="p-4 rounded-2xl rounded-tl-none border max-w-2xl space-y-2" style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2);">
-                            <div class="font-mono text-[11px] font-bold text-emerald-500">Scaffold Grok AI Assistant</div>
-                            <p class="leading-relaxed" style="color: var(--fg);">
-                                Hello <strong>${userName}</strong>! I'm your Grok-powered AI Assistant. I have indexed your Profile OS (<span class="font-mono">${userRole}</span>) and your ${projects.length} Kanban project(s).
+                            <div class="font-mono text-[11px] font-bold text-emerald-500">Scaffold Groq AI Assistant</div>
+                            <p id="astWelcomeMessage" class="leading-relaxed" style="color: var(--fg);">
+                                Hello <strong>${userName}</strong>! I'm your Groq-powered AI Assistant. I am syncing your Profile OS data...
                             </p>
                             <p class="text-xs text-muted">
                                 Ask me any developer question, request ATS resume optimizations, project ideas, or architecture advice!
@@ -123,7 +123,7 @@ export async function renderAssistantPage() {
                 <!-- Chat Input Area -->
                 <div class="p-4 border-t" style="border-color: var(--border); background: var(--bg);">
                     <form id="chatForm" class="flex items-center gap-3">
-                        <input type="text" id="chatInput" placeholder="Ask Grok AI Assistant anything about your code, career, or projects..."
+                        <input type="text" id="chatInput" placeholder="Ask Groq AI Assistant anything about your code, career, or projects..."
                             class="flex-1 input-field" style="border-radius: 8px;" autocomplete="off" />
                         <button type="submit" id="sendBtn" class="btn-primary text-xs px-5 py-3 shrink-0" style="background: #10b981; color: #fff;">
                             Send <i class="fas fa-paper-plane ml-1"></i>
@@ -147,6 +147,70 @@ export function bindAssistantEvents() {
     const promptChips = document.querySelectorAll('.prompt-chip-btn');
     const modeSelect = document.getElementById('assistantModeSelect');
 
+    const user = getCurrentAuthUser() || { displayName: 'Developer', uid: 'demo' };
+    let liveProfile = {};
+    let liveProjects = [];
+
+    // Intermediate 3s soft loading notice
+    const slowTimer = setTimeout(() => {
+        const statusEl = document.getElementById('astContextStatus');
+        if (statusEl) statusEl.innerHTML = `<span class="text-amber-400 font-normal"><i class="fas fa-circle-notch fa-spin"></i> Still loading...</span>`;
+    }, 3000);
+
+    // 20s soft timeout notice
+    const softTimeoutTimer = setTimeout(() => {
+        const statusEl = document.getElementById('astContextStatus');
+        if (statusEl) statusEl.innerHTML = `<span class="text-amber-400 font-normal"><i class="fas fa-circle-notch fa-spin"></i> Connecting...</span>`;
+    }, 20000);
+
+    // Asynchronously fetch Profile & Projects with 20s Promise.race() timeout
+    Promise.all([
+        fetchWithTimeout(getProfile(user.uid), 20000),
+        fetchWithTimeout(getProjects(user.uid), 20000)
+    ]).then(([profile, projects]) => {
+        clearTimeout(slowTimer);
+        clearTimeout(softTimeoutTimer);
+        liveProfile = profile || {};
+        liveProjects = projects || [];
+
+        const userName = liveProfile.fullName || user.displayName || 'Developer';
+        const userRole = liveProfile.targetRole || 'Software Engineer';
+        const coreLangs = liveProfile.coreLanguages || 'Web Technologies';
+
+        // Update DOM text
+        setText('astHeaderUserName', userName);
+        setText('astHeaderUserRole', userRole);
+        setText('astHeaderProjectCount', liveProjects.length);
+
+        setText('astCtxName', userName);
+        setText('astCtxRole', userRole);
+        setText('astCtxProjects', liveProjects.length);
+
+        const statusEl = document.getElementById('astContextStatus');
+        if (statusEl) statusEl.innerHTML = `<span class="text-emerald-400">✓ Ready</span>`;
+
+        const welcomeEl = document.getElementById('astWelcomeMessage');
+        if (welcomeEl) {
+            welcomeEl.innerHTML = `Hello <strong>${userName}</strong>! I'm your Groq-powered AI Assistant. I have indexed your Profile OS (<span class="font-mono">${userRole}</span>) and your ${liveProjects.length} Kanban project(s).`;
+        }
+
+        const chipIdeas = document.getElementById('chipProjectIdeas');
+        if (chipIdeas) {
+            chipIdeas.dataset.prompt = `Suggest 3 advanced full-stack project ideas matching my core stack (${coreLangs}).`;
+        }
+
+        const chipSysDesign = document.getElementById('chipSystemDesign');
+        if (chipSysDesign) {
+            chipSysDesign.dataset.prompt = `Give me system design interview prep tips tailored for a ${userRole}.`;
+        }
+    }).catch(err => {
+        clearTimeout(slowTimer);
+        clearTimeout(softTimeoutTimer);
+        console.error('Assistant context fetch ACTUAL ERROR object:', err);
+        const statusEl = document.getElementById('astContextStatus');
+        if (statusEl) statusEl.innerHTML = `<span class="text-amber-400">⚠️ ${err.message || err}</span>`;
+    });
+
     if (chatForm && chatInput && chatMessages) {
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -159,15 +223,15 @@ export function bindAssistantEvents() {
             const loadingDiv = appendLoadingMessage();
             
             try {
-                const aiResponse = await fetchGrokCompletion(text, modeSelect ? modeSelect.value : 'career');
+                const aiResponse = await fetchGroqCompletion(text, modeSelect ? modeSelect.value : 'career');
                 loadingDiv.remove();
                 appendAIMessage(aiResponse);
             } catch (err) {
                 loadingDiv.remove();
                 appendAIMessage(`
                     <div class="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 space-y-1">
-                        <div class="font-bold">⚠️ Grok AI Connection Notice</div>
-                        <p class="text-xs text-muted">${escapeHtml(err.message || 'Unable to connect to Grok API.')}</p>
+                        <div class="font-bold">⚠️ Groq AI Connection Notice</div>
+                        <p class="text-xs text-muted">${escapeHtml(err.message || 'Unable to connect to Groq API.')}</p>
                     </div>
                 `);
             }
@@ -194,7 +258,7 @@ export function bindAssistantEvents() {
                         🤖
                     </div>
                     <div class="p-4 rounded-2xl rounded-tl-none border max-w-xl space-y-2" style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2);">
-                        <div class="font-mono text-[11px] font-bold text-emerald-500">Scaffold Grok AI Assistant</div>
+                        <div class="font-mono text-[11px] font-bold text-emerald-500">Scaffold Groq AI Assistant</div>
                         <p class="text-xs text-muted">Chat cleared. Ready for your next query!</p>
                     </div>
                 </div>
@@ -202,9 +266,9 @@ export function bindAssistantEvents() {
         });
     }
 
-    async function fetchGrokCompletion(promptText, mode) {
-        const envKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GROK_API_KEY) ? import.meta.env.VITE_GROK_API_KEY : '';
-        const storedKey = localStorage.getItem('scaffold_grok_api_key') || '';
+    async function fetchGroqCompletion(promptText, mode) {
+        const envKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GROQ_API_KEY) ? import.meta.env.VITE_GROQ_API_KEY : '';
+        const storedKey = localStorage.getItem('scaffold_groq_api_key') || '';
         const apiKey = envKey || storedKey || '';
 
         if (!apiKey) {
@@ -212,30 +276,30 @@ export function bindAssistantEvents() {
             return generateFallbackResponse(promptText, mode);
         }
 
-        const user = getCurrentAuthUser() || { uid: 'demo' };
-        const profile = await getProfile(user.uid) || {};
-        const projects = await getProjects(user.uid) || [];
+        const userName = liveProfile.fullName || user.displayName || 'Developer';
+        const userRole = liveProfile.targetRole || 'Software Engineer';
+        const coreLangs = liveProfile.coreLanguages || 'Web Technologies';
 
-        const systemPrompt = `You are Scaffold AI, an expert developer, system architect, and career coach powered by Grok.
+        const systemPrompt = `You are Scaffold AI, an expert developer, system architect, and career coach powered by Groq.
 User Context:
-- Full Name: ${profile.fullName || 'Developer'}
-- Target Role: ${profile.targetRole || 'Software Engineer'}
-- Core Languages/Stack: ${profile.coreLanguages || 'Web Technologies'}
-- Bio: ${profile.bio || 'Developer'}
-- Kanban Projects: ${JSON.stringify(projects.map(p => ({ title: p.title || p.name, status: p.status, tech: p.techStack || p.tech })))}
+- Full Name: ${userName}
+- Target Role: ${userRole}
+- Core Languages/Stack: ${coreLangs}
+- Bio: ${liveProfile.bio || 'Developer'}
+- Kanban Projects: ${JSON.stringify(liveProjects.map(p => ({ title: p.title || p.name, status: p.status, tech: p.techStack || p.tech })))}
 Assistant Mode: ${mode}
 
 Instructions:
 Answer the user's prompt directly, concisely, and cleanly. Format text using HTML formatting tags like <strong>, <em>, <pre><code>, <ul><li> where appropriate. Keep answers practical, developer-focused, and well-structured.`;
 
-        const res = await fetch('https://api.x.ai/v1/chat/completions', {
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                model: 'grok-2-latest',
+                model: 'openai/gpt-oss-20b',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: promptText }
@@ -246,7 +310,7 @@ Answer the user's prompt directly, concisely, and cleanly. Format text using HTM
 
         if (!res.ok) {
             const errJson = await res.json().catch(() => ({}));
-            throw new Error(errJson.error?.message || `Grok API error: HTTP ${res.status}`);
+            throw new Error(errJson.error?.message || `Groq API error: HTTP ${res.status}`);
         }
 
         const data = await res.json();
@@ -280,7 +344,7 @@ Answer the user's prompt directly, concisely, and cleanly. Format text using HTM
             </div>
             <div class="p-4 rounded-2xl rounded-tl-none border max-w-xl text-xs text-muted flex items-center gap-2"
                 style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2);">
-                <i class="fas fa-circle-notch fa-spin text-emerald-500"></i> Grok AI is thinking...
+                <i class="fas fa-circle-notch fa-spin text-emerald-500"></i> Groq AI is thinking...
             </div>
         `;
         chatMessages.appendChild(loadingDiv);
@@ -297,7 +361,7 @@ Answer the user's prompt directly, concisely, and cleanly. Format text using HTM
             </div>
             <div class="p-4 rounded-2xl rounded-tl-none border max-w-2xl space-y-2 text-xs md:text-sm leading-relaxed"
                 style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2); color: var(--fg);">
-                <div class="font-mono text-[11px] font-bold text-emerald-500">Scaffold Grok AI Assistant</div>
+                <div class="font-mono text-[11px] font-bold text-emerald-500">Scaffold Groq AI Assistant</div>
                 <div>${htmlContent}</div>
             </div>
         `;
@@ -355,9 +419,14 @@ Answer the user's prompt directly, concisely, and cleanly. Format text using HTM
         return `
             <p>Based on your input for mode (<strong class="text-emerald-500 font-mono">${mode.toUpperCase()}</strong>):</p>
             <p class="text-xs text-muted leading-relaxed mt-1">
-                To enable live generative responses from Grok AI, ensure your API key is set in <code>.env</code> as <code>VITE_GROK_API_KEY=xai-...</code>.
+                To enable live generative responses from Groq AI, ensure your API key is set in <code>.env</code> as <code>VITE_GROQ_API_KEY=gsk-...</code>.
             </p>
         `;
+    }
+
+    function setText(id, text) {
+        const el = document.getElementById(id);
+        if (el && text !== undefined) el.innerText = text;
     }
 
     function escapeHtml(str) {
