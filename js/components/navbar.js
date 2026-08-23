@@ -1,5 +1,5 @@
 // === NAVBAR COMPONENT ===
-// Render navigation header with dynamic auth user state, mobile menu toggle, settings modal, and logout confirmation popup
+// Render navigation header with dynamic auth user state, mobile menu toggle, and logout confirmation popup
 
 import { getCurrentAuthUser, logoutUser } from '../../firebase/authService.js';
 import { getTheme } from '../theme/themeManager.js';
@@ -34,10 +34,6 @@ export function renderNavbar() {
                     <button class="theme-btn ${currentTheme === 'light' ? 'active' : ''}" data-theme="light" title="Light" aria-label="Light theme"><i class="fas fa-sun"></i></button>
                     <button class="theme-btn ${currentTheme === 'cyber' ? 'active' : ''}" data-theme="cyber" title="Cyber" aria-label="Cyber theme"><i class="fas fa-terminal"></i></button>
                 </div>
-
-                <button id="settingsBtn" class="btn-secondary text-xs flex items-center justify-center" title="Settings" aria-label="Settings" style="padding: 7px 11px; border-radius: 999px;">
-                    <i class="fas fa-cog text-sm"></i>
-                </button>
 
                 ${user ? `
                     <button id="logoutBtn" class="btn-secondary text-xs px-2.5 py-1.5 md:px-3" style="padding: 6px 12px;">
