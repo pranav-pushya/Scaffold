@@ -1,6 +1,3 @@
-// === BOOT SCREEN PAGE (INITIAL WEBSITE & REFRESH LOADER) ===
-// Terminal system initialization loader sequence with strict auth redirection rules
-
 import { getCurrentAuthUser } from '../../../firebase/authService.js';
 
 export function renderBootPage() {

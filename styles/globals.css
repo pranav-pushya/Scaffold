@@ -49,7 +49,7 @@ body.theme-anim *::after {
     font-family: 'JetBrains Mono', monospace;
 }
 
-/* === PROGRESS BAR === */
+/* Progress Bar */
 .progress-bar {
     position: fixed;
     top: 0;
@@ -61,7 +61,7 @@ body.theme-anim *::after {
     box-shadow: 0 0 12px var(--accent), 0 0 4px var(--accent);
 }
 
-/* === BACKGROUND GRID === */
+/* Background Grid */
 .bg-grid {
     background-image:
         linear-gradient(var(--border) 1px, transparent 1px),
@@ -70,7 +70,7 @@ body.theme-anim *::after {
     background-position: center center;
 }
 
-/* === FLOATING DOTS === */
+/* Floating Dots */
 .float-dot {
     position: absolute;
     border-radius: 50%;
@@ -86,7 +86,7 @@ body.theme-anim *::after {
     66% { transform: translate(-30px, 50px) scale(0.95); }
 }
 
-/* === MOUSE GLOW === */
+/* Mouse Glow */
 .mouse-glow {
     position: absolute;
     width: 700px;
@@ -101,7 +101,7 @@ body.theme-anim *::after {
     z-index: 1;
 }
 
-/* === TYPEWRITER CURSOR === */
+/* Typewriter Cursor */
 .cursor::after {
     content: '▌';
     color: var(--accent);
@@ -125,7 +125,7 @@ body.theme-anim *::after {
     vertical-align: text-bottom;
 }
 
-/* === LINKS === */
+/* Links */
 .hover-link {
     position: relative;
     color: var(--fg-dim);
@@ -152,7 +152,7 @@ body.theme-anim *::after {
     width: 100%;
 }
 
-/* === THEME TOGGLE === */
+/* Theme Toggle */
 .theme-toggle {
     display: inline-flex;
     background: var(--bg-elev);
@@ -188,7 +188,7 @@ body.theme-anim *::after {
     transform: scale(1.08);
 }
 
-/* === STAT PILL === */
+/* Stat Pill */
 .stat-pill {
     display: inline-flex;
     align-items: center;
@@ -234,7 +234,7 @@ body.theme-anim *::after {
     100% { transform: translateY(0); }
 }
 
-/* === TAG === */
+/* Tag */
 .tag {
     display: inline-block;
     font-family: 'JetBrains Mono', monospace;
@@ -249,7 +249,7 @@ body.theme-anim *::after {
     font-weight: 500;
 }
 
-/* === BUTTONS === */
+/* Buttons */
 .btn-primary {
     background: var(--accent);
     color: var(--bg);
@@ -314,7 +314,7 @@ body.theme-anim *::after {
     transform: translateY(-2px);
 }
 
-/* === CARDS === */
+/* Cards */
 .article-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -351,7 +351,7 @@ body.theme-anim *::after {
     transform: scaleX(1);
 }
 
-/* === INPUT FIELDS === */
+/* Input Fields */
 .input-field {
     background: var(--bg);
     border: 1px solid var(--border-strong);
@@ -374,7 +374,7 @@ body.theme-anim *::after {
     color: var(--muted);
 }
 
-/* === REVEAL ANIMATION === */
+/* Reveal Animation */
 .reveal {
     opacity: 0;
     transform: translateY(30px);
@@ -386,7 +386,7 @@ body.theme-anim *::after {
     transform: translateY(0);
 }
 
-/* === SCROLLBAR === */
+/* Scrollbar */
 ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -411,7 +411,7 @@ body.theme-anim *::after {
     color: var(--bg);
 }
 
-/* === MARQUEE TICKER ANIMATION === */
+/* Marquee Ticker Animation */
 .marquee-wrap {
     overflow: hidden;
     white-space: nowrap;
@@ -442,7 +442,7 @@ body.theme-anim *::after {
     }
 }
 
-/* === RESPONSIVE MOBILE NAVIGATION VISIBILITY === */
+/* Mobile Navigation */
 @media (min-width: 768px) {
     #mobileMenuBtn, #mobileNavMenu {
         display: none !important;
@@ -455,7 +455,7 @@ body.theme-anim *::after {
     }
 }
 
-/* === GLOBAL THEME STYLED SELECT & OPTIONS === */
+/* Theme Select & Options */
 select {
     background-color: var(--bg);
     color: var(--fg);

@@ -1,6 +1,3 @@
-// === THEME MANAGER ===
-// Controls dark, light, and cyber themes with localStorage persistence and keyboard shortcuts
-
 const THEMES = ['dark', 'light', 'cyber'];
 const STORAGE_KEY = 'scaffold-theme';
 const root = document.documentElement;

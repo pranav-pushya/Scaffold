@@ -1,6 +1,3 @@
-// === FIREBASE FIRESTORE SERVICE ===
-// Manages Firestore CRUD operations for Profile & Project Tracker using real Firestore SDK with offline safety
-
 import { 
     doc, 
     setDoc, 
@@ -13,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebaseConfig.js';
 
+// Safety timeout margin for Firestore network handshakes
 export function fetchWithTimeout(promise, ms = 20000) {
     let timeoutId;
     const timeoutPromise = new Promise((_, reject) => {

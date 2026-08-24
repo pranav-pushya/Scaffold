@@ -1,6 +1,3 @@
-// === CAPTCHA MODULE ===
-// Simulated reCAPTCHA v2 / Math Captcha widget verification logic
-
 let captchaVerified = false;
 
 export function renderCaptchaWidget() {

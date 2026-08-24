@@ -1,4 +1,4 @@
-/* === THEME TOKENS === */
+/* Theme Tokens */
 :root[data-theme="dark"] {
     --bg: #0c0b09;
     --bg-elev: #14120e;
@@ -104,7 +104,7 @@ body.theme-anim *::after {
     font-family: 'JetBrains Mono', monospace;
 }
 
-/* === PROGRESS BAR === */
+/* Progress Bar */
 .progress-bar {
     position: fixed;
     top: 0;
@@ -116,7 +116,7 @@ body.theme-anim *::after {
     box-shadow: 0 0 12px var(--accent), 0 0 4px var(--accent);
 }
 
-/* === BACKGROUND GRID === */
+/* Background Grid */
 .bg-grid {
     background-image:
         linear-gradient(var(--border) 1px, transparent 1px),
@@ -125,7 +125,7 @@ body.theme-anim *::after {
     background-position: center center;
 }
 
-/* === FLOATING DOTS === */
+/* Floating Dots */
 .float-dot {
     position: absolute;
     border-radius: 50%;
@@ -151,7 +151,7 @@ body.theme-anim *::after {
     }
 }
 
-/* === MOUSE GLOW === */
+/* Mouse Glow */
 .mouse-glow {
     position: absolute;
     width: 700px;
@@ -166,7 +166,7 @@ body.theme-anim *::after {
     z-index: 1;
 }
 
-/* === TYPEWRITER CURSOR === */
+/* Typewriter Cursor */
 .cursor::after {
     content: '▌';
     color: var(--accent);
@@ -198,7 +198,7 @@ body.theme-anim *::after {
     vertical-align: text-bottom;
 }
 
-/* === LINKS === */
+/* Links */
 .hover-link {
     position: relative;
     color: var(--fg-dim);
@@ -225,7 +225,7 @@ body.theme-anim *::after {
     width: 100%;
 }
 
-/* === THEME TOGGLE === */
+/* Theme Toggle */
 .theme-toggle {
     display: inline-flex;
     background: var(--bg-elev);
@@ -261,7 +261,7 @@ body.theme-anim *::after {
     transform: scale(1.08);
 }
 
-/* === STAT PILL === */
+/* Stat Pill */
 .stat-pill {
     display: inline-flex;
     align-items: center;
@@ -324,7 +324,7 @@ body.theme-anim *::after {
     }
 }
 
-/* === TAG === */
+/* Tag */
 .tag {
     display: inline-block;
     font-family: 'JetBrains Mono', monospace;
@@ -339,7 +339,7 @@ body.theme-anim *::after {
     font-weight: 500;
 }
 
-/* === BUTTONS === */
+/* Buttons */
 .btn-primary {
     background: var(--accent);
     color: var(--bg);
@@ -404,7 +404,7 @@ body.theme-anim *::after {
     transform: translateY(-2px);
 }
 
-/* === ARTICLE CARDS === */
+/* Article Cards */
 .article-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -495,7 +495,7 @@ body.theme-anim *::after {
     color: var(--accent);
 }
 
-/* === CODE WINDOW === */
+/* Code Window */
 .code-window {
     background: var(--code-bg);
     border: 1px solid var(--border-strong);
@@ -576,7 +576,7 @@ body.theme-anim *::after {
     }
 }
 
-/* === SYNTAX HIGHLIGHTING === */
+/* Syntax Highlighting */
 .tk-key {
     color: #ff7b72;
 }
@@ -654,7 +654,7 @@ body.theme-anim *::after {
     color: #c2410c;
 }
 
-/* === ARCHIVE LIST === */
+/* Archive List */
 .archive-item {
     display: flex;
     align-items: center;
@@ -698,7 +698,7 @@ body.theme-anim *::after {
     transition: color 0.3s ease;
 }
 
-/* === MARQUEE === */
+/* Marquee */
 .marquee-wrap {
     overflow: hidden;
     white-space: nowrap;
@@ -721,7 +721,7 @@ body.theme-anim *::after {
     }
 }
 
-/* === SCROLLBAR === */
+/* Scrollbar */
 ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -746,7 +746,7 @@ body.theme-anim *::after {
     color: var(--bg);
 }
 
-/* === REVEAL === */
+/* Reveal */
 .reveal {
     opacity: 0;
     transform: translateY(30px);
@@ -758,7 +758,7 @@ body.theme-anim *::after {
     transform: translateY(0);
 }
 
-/* === INPUT === */
+/* Input */
 .input-field {
     background: var(--bg);
     border: 1px solid var(--border-strong);
@@ -781,7 +781,7 @@ body.theme-anim *::after {
     color: var(--muted);
 }
 
-/* === RESPONSIVE === */
+/* Responsive */
 @media (max-width: 768px) {
     .article-card {
         padding: 22px;

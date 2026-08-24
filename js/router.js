@@ -1,6 +1,3 @@
-// === SPA ROUTER ===
-// Hash-based client router handling page transitions, auth guards & component mounting with error boundaries
-
 import { renderNavbar, bindNavbarEvents } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
 import { requireAuth } from './components/protectedRoute.js';
@@ -38,13 +35,13 @@ export async function handleRouting() {
 
     const route = routes[hash];
 
-    // Check protected route guard
     if (route.protected && !requireAuth()) {
-        return; // Guard redirects to #login
+        return;
     }
 
-    // Render HTML layout with try-catch error boundary to prevent unhandled rejection crashes
+    // Try-catch prevents unhandled data rejections from blocking initial page layout
     let contentHtml = '';
+
     try {
         contentHtml = await route.render();
     } catch (err) {

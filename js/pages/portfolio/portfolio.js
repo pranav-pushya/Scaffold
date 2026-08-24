@@ -1,6 +1,3 @@
-// === AUTO PORTFOLIO PAGE ===
-// Dynamic developer portfolio auto-generated from Profile OS data and Tracker projects with non-blocking initial rendering
-
 import { getCurrentAuthUser } from '../../../firebase/authService.js';
 import { getProfile, getProjects, fetchWithTimeout } from '../../../firebase/firestoreService.js';
 

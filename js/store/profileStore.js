@@ -1,6 +1,3 @@
-// === PROFILE STORE ===
-// Local cache layer mirroring Firestore User Profile data
-
 class ProfileStore {
     constructor() {
         this.STORAGE_KEY = 'scaffold_profile_store';

@@ -1,6 +1,3 @@
-// === TRACKER STORE ===
-// Local cache layer mirroring Firestore Job & Project Tracker Kanban data
-
 class TrackerStore {
     constructor() {
         this.STORAGE_KEY = 'scaffold_tracker_store';

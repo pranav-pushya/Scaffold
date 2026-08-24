@@ -1,6 +1,3 @@
-// === NAVBAR COMPONENT ===
-// Render navigation header with dynamic auth user state, mobile menu toggle, and logout confirmation popup
-
 import { getCurrentAuthUser, logoutUser } from '../../firebase/authService.js';
 import { getTheme } from '../theme/themeManager.js';
 

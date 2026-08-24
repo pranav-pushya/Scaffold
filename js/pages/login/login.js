@@ -1,6 +1,3 @@
-// === LOGIN / SIGNUP PAGE ===
-// Handles Email/Password Authentication, Google Auth, Captcha & Form validation
-
 import { loginWithEmail, signUpWithEmail, loginWithGoogle } from '../../../firebase/authService.js';
 import { renderCaptchaWidget } from './captcha.js';
 

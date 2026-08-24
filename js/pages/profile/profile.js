@@ -1,6 +1,3 @@
-// === DEVELOPER PROFILE & CAREER RECORD PAGE ===
-// Comprehensive controlled profile form matching PBE-I specification with non-blocking initial rendering
-
 import { getCurrentAuthUser } from '../../../firebase/authService.js';
 import { getProfile, saveProfile, fetchWithTimeout } from '../../../firebase/firestoreService.js';
 

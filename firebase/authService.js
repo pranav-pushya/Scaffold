@@ -1,6 +1,3 @@
-// === FIREBASE AUTH SERVICE ===
-// Manages Signup, Login, Google OAuth, and Logout using Firebase Auth SDK
-
 import { 
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
@@ -14,7 +11,6 @@ import { auth } from './firebaseConfig.js';
 
 let currentUser = null;
 
-// Listen to auth state changes to keep track of current user
 onAuthStateChanged(auth, (user) => {
     currentUser = user;
 });

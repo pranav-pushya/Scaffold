@@ -1,6 +1,3 @@
-// === KANBAN JOB & PROJECT TRACKER PAGE ===
-// Real-time 3-column Kanban project tracker matching specification with non-blocking initial rendering
-
 import { getCurrentAuthUser } from '../../../firebase/authService.js';
 import { getProjects, saveProject, updateProject, deleteProject, fetchWithTimeout } from '../../../firebase/firestoreService.js';
 

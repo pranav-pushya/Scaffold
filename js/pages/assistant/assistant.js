@@ -1,6 +1,3 @@
-// === AI ASSISTANT PAGE ===
-// Interactive Developer & Career Assistant powered by Groq API & Profile OS context with non-blocking initial rendering
-
 import { getCurrentAuthUser } from '../../../firebase/authService.js';
 import { getProfile, getProjects, fetchWithTimeout } from '../../../firebase/firestoreService.js';
 

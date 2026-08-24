@@ -1,6 +1,3 @@
-// === DASHBOARD PAGE ===
-// Dynamic developer dashboard matching reference architecture with non-blocking initial rendering
-
 import { getCurrentAuthUser } from '../../../firebase/authService.js';
 import { getProfile, getProjects, fetchWithTimeout } from '../../../firebase/firestoreService.js';
 

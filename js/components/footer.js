@@ -1,6 +1,3 @@
-// === FOOTER COMPONENT ===
-// Render consistent footer section with Team Members & Platform Highlights
-
 const TEAM_MEMBERS = [
     {
         name: 'Pranav Pushya',

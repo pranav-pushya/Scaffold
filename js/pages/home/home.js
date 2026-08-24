@@ -1,6 +1,3 @@
-// === HOME PAGE ===
-// Landing view customized specifically for Scaffold SPA Platform
-
 export function renderHomePage() {
     return `
     <section class="hero-section bg-grid" id="hero">
