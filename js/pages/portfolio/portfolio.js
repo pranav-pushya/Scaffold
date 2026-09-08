@@ -109,6 +109,27 @@ export function renderPortfolioPage() {
             </div>
 
         </div>
+
+        <!-- Portfolio Photo Lightbox Modal -->
+        <div id="portPhotoModal" class="fixed inset-0 w-screen h-screen z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+            <div class="p-6 rounded-2xl max-w-md w-full mx-4 shadow-2xl border text-center relative space-y-4" style="background: var(--card); border-color: var(--border-strong);">
+                <button type="button" id="closePortPhotoModalBtn" class="absolute top-4 right-4 text-muted hover:text-white transition-colors text-lg" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="flex justify-center my-2">
+                    <img id="portModalImage" src="" alt="Full Profile Photo" class="max-w-full max-h-[60vh] rounded-xl border-2 border-emerald-500/40 object-cover shadow-2xl">
+                </div>
+                <div class="flex items-center justify-between pt-2 border-t" style="border-color: var(--border);">
+                    <a href="#profile" class="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1">
+                        <i class="fas fa-crop-alt"></i> Edit in Profile
+                    </a>
+                    <button type="button" id="closePortPhotoModalBtn2" class="btn-primary text-xs px-4 py-1.5" style="background: #10b981; color: #fff;">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
     `;
 }
@@ -174,10 +195,36 @@ export function bindPortfolioEvents() {
             const photoEl = document.getElementById('portPhotoBox');
             if (photoEl) {
                 photoEl.innerHTML = `
-                    <div class="w-32 h-32 rounded-2xl overflow-hidden border-2 border-emerald-500/40 shrink-0 shadow-lg">
+                    <div class="w-32 h-32 rounded-2xl overflow-hidden border-2 border-emerald-500/40 shrink-0 shadow-lg cursor-pointer group relative transition-transform duration-200 hover:scale-105 hover:border-emerald-400" id="portPhotoClickBox" title="Click to view full photo">
                         <img src="${profile.photoUrl}" alt="${fullName}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-base">
+                            <i class="fas fa-search-plus"></i>
+                        </div>
                     </div>
                 `;
+                const clickBox = document.getElementById('portPhotoClickBox');
+                const portModal = document.getElementById('portPhotoModal');
+                const portModalImg = document.getElementById('portModalImage');
+                const closeBtn1 = document.getElementById('closePortPhotoModalBtn');
+                const closeBtn2 = document.getElementById('closePortPhotoModalBtn2');
+
+                const closePortModal = () => {
+                    if (portModal) portModal.classList.add('opacity-0', 'pointer-events-none');
+                };
+
+                if (clickBox && portModal && portModalImg) {
+                    clickBox.addEventListener('click', () => {
+                        portModalImg.src = profile.photoUrl;
+                        portModal.classList.remove('opacity-0', 'pointer-events-none');
+                    });
+                }
+                if (closeBtn1) closeBtn1.addEventListener('click', closePortModal);
+                if (closeBtn2) closeBtn2.addEventListener('click', closePortModal);
+                if (portModal) {
+                    portModal.addEventListener('click', (e) => {
+                        if (e.target === portModal) closePortModal();
+                    });
+                }
             }
         }
 
