@@ -51,6 +51,12 @@ export default function Boot() {
       if (target === '/boot') {
         target = '/';
       }
+      if (target === '/') {
+        try {
+          const preferredLanding = localStorage.getItem('scaffold_default_landing');
+          if (preferredLanding) target = preferredLanding;
+        } catch (e) {}
+      }
 
       if (!currentUser) {
         // If not logged in and target is a protected route, go to /login

@@ -31,6 +31,16 @@ export default function Tracker() {
   const [cardForm, setCardForm] = useState(initialCardState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusNotice, setStatusNotice] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Check URL query params for ?new=1 (from shortcuts / command palette)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('new') === '1') {
+      setShowForm(true);
+      window.history.replaceState({}, '', '/tracker');
+    }
+  }, []);
 
   const userId = currentUser?.uid;
 
@@ -131,9 +141,17 @@ export default function Tracker() {
   };
 
   const projectList = Array.isArray(projects) ? projects : [];
-  const todoCards = projectList.filter((p) => normalizeStatus(p.status) === 'To-Do');
-  const inProgressCards = projectList.filter((p) => normalizeStatus(p.status) === 'In Progress');
-  const doneCards = projectList.filter((p) => normalizeStatus(p.status) === 'Done');
+  const filteredList = projectList.filter((p) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    const title = (p.title || p.name || '').toLowerCase();
+    const tech = (p.techStack || p.tech || '').toLowerCase();
+    const desc = (p.description || '').toLowerCase();
+    return title.includes(q) || tech.includes(q) || desc.includes(q);
+  });
+  const todoCards = filteredList.filter((p) => normalizeStatus(p.status) === 'To-Do');
+  const inProgressCards = filteredList.filter((p) => normalizeStatus(p.status) === 'In Progress');
+  const doneCards = filteredList.filter((p) => normalizeStatus(p.status) === 'Done');
 
   const renderCard = (card) => {
     const tags = (card.techStack || card.tech || '')
@@ -265,6 +283,32 @@ export default function Tracker() {
             <span className="text-amber-400">{statusNotice}</span>
           </div>
         )}
+
+        {/* Search & Filter Bar (Focusable via / hotkey) */}
+        <div className="mb-6 flex items-center gap-3">
+          <div className="relative flex-1">
+            <i className="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-muted text-xs"></i>
+            <input
+              type="search"
+              id="trackerSearchInput"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search & filter cards by title, tech stack... (Press / to focus)"
+              className="w-full pl-9 pr-4 py-2 rounded-xl text-xs font-mono border input-field"
+              style={{ background: 'var(--bg-elev)', borderColor: 'var(--border)' }}
+            />
+          </div>
+          {searchQuery && (
+            <button
+              type="button"
+              id="clearTrackerSearchBtn"
+              onClick={() => setSearchQuery('')}
+              className="btn-secondary text-xs px-3 py-2 font-mono flex items-center gap-1 shrink-0"
+            >
+              <i className="fas fa-times"></i> Clear
+            </button>
+          )}
+        </div>
 
         {/* Create / Edit Tracker Card Form */}
         {showForm && (

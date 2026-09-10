@@ -197,6 +197,89 @@ body.theme-anim *::after {
     transform: scale(1.08);
 }
 
+/* Settings Button */
+.settings-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-elev);
+    color: var(--muted);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.settings-btn:hover {
+    color: var(--fg);
+    border-color: var(--accent);
+    transform: scale(1.06);
+    box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.25);
+}
+
+.settings-btn.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.12);
+    box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.3);
+}
+
+/* Custom Toggle Switch */
+.scaffold-toggle-track {
+    width: 44px;
+    height: 24px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    padding: 2px;
+}
+
+.scaffold-toggle-track.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.scaffold-toggle-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: var(--fg);
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease;
+}
+
+.scaffold-toggle-track.checked .scaffold-toggle-thumb {
+    transform: translateX(20px);
+    background: var(--bg);
+}
+
+/* Keyboard Shortcut Key Badges */
+.scaffold-kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 7px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--fg);
+    background: var(--bg-elev);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    box-shadow: 0 2px 0 var(--border);
+    min-width: 24px;
+    line-height: 1.4;
+}
+
 /* Stat Pill */
 .stat-pill {
     display: inline-flex;
@@ -489,4 +572,37 @@ select option {
     background-color: #ffffff !important;
     color: #0f172a !important;
 }
+
+/* Reduced Motion Mode */
+body.reduce-motion .float-dot,
+body.reduce-motion .mouse-glow {
+    display: none !important;
+}
+
+[data-theme="cyber"] body.reduce-motion::before {
+    display: none !important;
+}
+
+body.reduce-motion,
+body.reduce-motion *,
+body.reduce-motion *::before,
+body.reduce-motion *::after {
+    animation: none !important;
+    transition-duration: 0.001ms !important;
+}
+
+/* Compact Density Mode */
+body.compact-density .tracker-card {
+    padding: 10px !important;
+    margin-bottom: 8px !important;
+}
+
+body.compact-density .profile-section {
+    padding: 14px !important;
+}
+
+body.compact-density .stat-card {
+    padding: 12px !important;
+}
+
 

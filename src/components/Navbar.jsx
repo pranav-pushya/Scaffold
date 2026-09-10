@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
 import { useTheme } from '../hooks/useTheme.js';
 import { logoutUser } from '../firebase/authService.js';
+import SettingsDrawer from './SettingsDrawer.jsx';
 
 export default function Navbar() {
   const { currentUser } = useAuth();
@@ -11,6 +12,30 @@ export default function Navbar() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Listen for global custom events from useGlobalShortcuts & Command Palette
+  useEffect(() => {
+    const handleToggleSettings = () => setSettingsOpen((prev) => !prev);
+    const handleOpenSettings = () => setSettingsOpen(true);
+    const handleTriggerLogout = () => setShowLogoutModal(true);
+    const handleCloseAll = () => {
+      setSettingsOpen(false);
+      setShowLogoutModal(false);
+    };
+
+    window.addEventListener('scaffold-toggle-settings', handleToggleSettings);
+    window.addEventListener('scaffold-open-settings', handleOpenSettings);
+    window.addEventListener('scaffold-trigger-logout', handleTriggerLogout);
+    window.addEventListener('scaffold-close-all', handleCloseAll);
+
+    return () => {
+      window.removeEventListener('scaffold-toggle-settings', handleToggleSettings);
+      window.removeEventListener('scaffold-open-settings', handleOpenSettings);
+      window.removeEventListener('scaffold-trigger-logout', handleTriggerLogout);
+      window.removeEventListener('scaffold-close-all', handleCloseAll);
+    };
+  }, []);
 
   const handleConfirmLogout = async () => {
     setShowLogoutModal(false);
@@ -78,6 +103,18 @@ export default function Navbar() {
 
           {/* Right Action Controls */}
           <div className="flex items-center gap-2 md:gap-3">
+            {/* Settings Trigger Button */}
+            <button
+              id="settingsBtn"
+              type="button"
+              onClick={() => setSettingsOpen(true)}
+              className={`settings-btn ${settingsOpen ? 'active' : ''}`}
+              title="Workspace Settings (?)"
+              aria-label="Open Workspace Settings"
+            >
+              <i className="fas fa-gear"></i>
+            </button>
+
             {/* Theme Toggle */}
             <div className="theme-toggle" role="group" aria-label="Theme selector">
               <button
@@ -295,6 +332,12 @@ export default function Navbar() {
           </div>
         </div>
       )}
+
+      {/* Settings Slide-over Drawer */}
+      <SettingsDrawer
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
     </>
   );
 }
