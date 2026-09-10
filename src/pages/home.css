@@ -1,9 +1,0 @@
-.hero-section {
-    min-height: calc(100vh - 80px);
-    display: flex;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
-    padding-top: 100px;
-    padding-bottom: 80px;
-}

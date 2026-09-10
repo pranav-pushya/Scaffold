@@ -7,15 +7,15 @@ import { TrackerProvider } from './context/TrackerContext.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Layout from './components/Layout.jsx';
 
-import Home from './pages/Home.jsx';
-import Login from './pages/Login.jsx';
-import Dashboard from './pages/Dashboard.jsx';
-import Profile from './pages/Profile.jsx';
-import Tracker from './pages/Tracker.jsx';
-import Portfolio from './pages/Portfolio.jsx';
-import Resume from './pages/Resume.jsx';
-import Assistant from './pages/Assistant.jsx';
-import Boot from './pages/Boot.jsx';
+import Home from './pages/Home/Home.jsx';
+import Login from './pages/Login/Login.jsx';
+import Dashboard from './pages/Dashboard/Dashboard.jsx';
+import Profile from './pages/Profile/Profile.jsx';
+import Tracker from './pages/Tracker/Tracker.jsx';
+import Portfolio from './pages/Portfolio/Portfolio.jsx';
+import Resume from './pages/Resume/Resume.jsx';
+import Assistant from './pages/Assistant/Assistant.jsx';
+import Boot from './pages/Boot/Boot.jsx';
 
 function BootNavigator() {
   const navigate = useNavigate();
