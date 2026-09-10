@@ -13,6 +13,14 @@ const initialCardState = {
   description: '',
 };
 
+export const normalizeStatus = (status) => {
+  if (!status) return 'To-Do';
+  const s = String(status).trim().toLowerCase();
+  if (s.includes('progress')) return 'In Progress';
+  if (s.includes('done') || s.includes('complete')) return 'Done';
+  return 'To-Do';
+};
+
 export default function Tracker() {
   const { currentUser } = useAuth();
   const { projects, loading, loadProjects, addProject, updateProject, deleteProject } = useTracker();
@@ -60,7 +68,7 @@ export default function Tracker() {
       techStack: card.techStack || card.tech || '',
       repoUrl: card.repoUrl || '',
       deployUrl: card.deployUrl || '',
-      status: card.status || 'To-Do',
+      status: normalizeStatus(card.status),
       description: card.description || '',
     });
     setShowForm(true);
@@ -68,11 +76,12 @@ export default function Tracker() {
   };
 
   const handleDeleteClick = async (cardId) => {
-    if (!userId) return;
     if (window.confirm('Are you sure you want to delete this card?')) {
       try {
         await deleteProject(userId, cardId);
-        await deleteFirestoreProject(userId, cardId).catch(() => {});
+        if (userId) {
+          await deleteFirestoreProject(userId, cardId).catch(() => {});
+        }
       } catch (err) {
         console.error('Failed to delete card:', err);
       }
@@ -80,11 +89,12 @@ export default function Tracker() {
   };
 
   const handleStatusChange = async (card, newStatus) => {
-    if (!userId) return;
     try {
       const updated = { ...card, status: newStatus };
       await updateProject(userId, updated);
-      await updateFirestoreProject(userId, updated).catch(() => {});
+      if (userId) {
+        await updateFirestoreProject(userId, updated).catch(() => {});
+      }
     } catch (err) {
       console.error('Failed to update status:', err);
     }
@@ -121,9 +131,9 @@ export default function Tracker() {
   };
 
   const projectList = Array.isArray(projects) ? projects : [];
-  const todoCards = projectList.filter((p) => p.status === 'To-Do' || !p.status);
-  const inProgressCards = projectList.filter((p) => p.status === 'In Progress');
-  const doneCards = projectList.filter((p) => p.status === 'Done');
+  const todoCards = projectList.filter((p) => normalizeStatus(p.status) === 'To-Do');
+  const inProgressCards = projectList.filter((p) => normalizeStatus(p.status) === 'In Progress');
+  const doneCards = projectList.filter((p) => normalizeStatus(p.status) === 'Done');
 
   const renderCard = (card) => {
     const tags = (card.techStack || card.tech || '')
@@ -203,7 +213,8 @@ export default function Tracker() {
           <select
             className="profile-select py-1 px-2 text-xs card-status-select"
             data-card-id={card.id}
-            value={card.status || 'To-Do'}
+            aria-label={`Status for ${card.title || card.name || 'card'}`}
+            value={normalizeStatus(card.status)}
             onChange={(e) => handleStatusChange(card, e.target.value)}
             style={{ width: 'auto', height: '28px' }}
           >

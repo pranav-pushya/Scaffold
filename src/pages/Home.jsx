@@ -150,18 +150,18 @@ export default function Home() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl">
               <div>
                 <div className="font-mono font-bold text-3xl md:text-4xl" style={{ color: 'var(--accent)' }}>
-                  3
+                  6
                 </div>
                 <div className="font-mono text-xs uppercase tracking-widest mt-2" style={{ color: 'var(--muted)' }}>
-                  core engineers
+                  connected modules
                 </div>
               </div>
               <div>
                 <div className="font-mono font-bold text-3xl md:text-4xl" style={{ color: 'var(--accent)' }}>
-                  100%
+                  Live
                 </div>
                 <div className="font-mono text-xs uppercase tracking-widest mt-2" style={{ color: 'var(--muted)' }}>
-                  react JS &amp; firebase
+                  firestore cloud sync
                 </div>
               </div>
               <div>
@@ -197,10 +197,13 @@ export default function Home() {
       <section className="max-w-6xl mx-auto px-6 py-20">
         <h2 className="font-display font-black text-3xl mb-12 text-center">Core Platform Features</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="card space-y-3">
-            <i className="fas fa-user-lock text-3xl text-amber-500 mb-2"></i>
-            <h3 className="font-display font-bold text-lg">Firebase Auth System</h3>
-            <p className="text-xs text-muted leading-relaxed">
+          <div className="article-card">
+            <div className="flex items-center justify-between mb-4">
+              <span className="tag">Security</span>
+              <i className="fas fa-user-lock text-amber-500 text-lg"></i>
+            </div>
+            <h3 className="font-display font-bold text-2xl mb-3">Firebase Auth System</h3>
+            <p className="text-sm text-muted leading-relaxed mb-6">
               Multi-factor security flow integrating Email/Password, Google OAuth, and interactive math Security Check validation.
             </p>
             <Link to="/login" className="hover-link font-mono text-xs">

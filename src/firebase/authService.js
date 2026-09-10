@@ -5,7 +5,8 @@ import {
     GoogleAuthProvider, 
     signOut, 
     onAuthStateChanged,
-    updateProfile 
+    updateProfile,
+    sendPasswordResetEmail
 } from 'firebase/auth';
 import { auth } from './firebaseConfig.js';
 
@@ -52,3 +53,12 @@ export async function logoutUser() {
 export function getCurrentAuthUser() {
     return currentUser || auth.currentUser;
 }
+
+export async function resetPassword(email) {
+    if (!email || !email.trim()) {
+        throw new Error('Please enter your email address to reset password.');
+    }
+    await sendPasswordResetEmail(auth, email.trim());
+    return true;
+}
+

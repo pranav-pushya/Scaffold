@@ -14,12 +14,21 @@ export default function Login() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [resetMessage, setResetMessage] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [modalResetError, setModalResetError] = useState('');
+  const [modalResetSuccess, setModalResetSuccess] = useState('');
   const [captcha, setCaptcha] = useState(generateCaptcha);
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { currentUser, loginWithEmail, signUpWithEmail, loginWithGoogle, logoutUser } = useAuth();
+  const { currentUser, loginWithEmail, signUpWithEmail, loginWithGoogle, logoutUser, resetPassword } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -30,14 +39,93 @@ export default function Login() {
     }
   }, [currentUser, navigate, location]);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showResetModal) {
+        setShowResetModal(false);
+        setModalResetError('');
+        setModalResetSuccess('');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showResetModal]);
+
   const handleTabSwitch = (newMode) => {
     setMode(newMode);
     setError('');
+    setResetMessage('');
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+    setShowResetModal(false);
+  };
+
+  const handleOpenResetModal = (e) => {
+    if (e) e.preventDefault();
+    setError('');
+    setModalResetError('');
+    setModalResetSuccess('');
+    setResetEmail(email.trim() || '');
+    setShowResetModal(true);
+  };
+
+  const handleCloseResetModal = () => {
+    setShowResetModal(false);
+    setModalResetError('');
+    setModalResetSuccess('');
+  };
+
+  const handleModalResetSubmit = async (e) => {
+    e.preventDefault();
+    setModalResetError('');
+    setModalResetSuccess('');
+
+    const targetEmail = resetEmail.trim();
+    if (!targetEmail) {
+      setModalResetError('Please enter your email address.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(targetEmail)) {
+      setModalResetError('Please enter a valid email address.');
+      return;
+    }
+
+    setIsResetting(true);
+    try {
+      await resetPassword(targetEmail);
+      setModalResetSuccess(`Password reset email sent to ${targetEmail}!`);
+      setEmail(targetEmail);
+      setResetMessage(`Password reset email sent to ${targetEmail} — check your inbox.`);
+    } catch (err) {
+      console.error('Password reset error:', err);
+      if (err.code === 'auth/user-not-found') {
+        setModalResetError('No account found with this email address.');
+      } else if (err.code === 'auth/invalid-email') {
+        setModalResetError('Please enter a valid email address.');
+      } else if (err.code === 'auth/missing-email') {
+        setModalResetError('Please enter your email address.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setModalResetError('Too many requests. Please try again in a few minutes.');
+      } else {
+        setModalResetError(err.message || 'Failed to send password reset email. Please try again.');
+      }
+    } finally {
+      setIsResetting(false);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setResetMessage('');
+
+    // If Sign Up, validate passwords match before proceeding
+    if (mode === 'signup' && password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
 
     // Captcha validation
     if (parseInt(captchaAnswer, 10) !== captcha.expected) {
@@ -240,16 +328,74 @@ export default function Login() {
 
               <div>
                 <label className="block font-mono text-xs mb-1 text-muted">Password</label>
-                <input
-                  type="password"
-                  id="passInput"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="input-field"
-                  placeholder="••••••••"
-                  required
-                />
+                <div className="password-input-wrapper">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id="passInput"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="input-field"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    id="togglePasswordBtn"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className={`password-toggle-btn ${showPassword ? 'active' : ''}`}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                  </button>
+                </div>
+                {mode === 'login' && (
+                  <div className="flex justify-end mt-1.5">
+                    <button
+                      type="button"
+                      id="forgotPasswordBtn"
+                      onClick={handleOpenResetModal}
+                      className="text-xs font-mono transition-colors hover:underline"
+                      style={{
+                        color: 'var(--accent)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 0
+                      }}
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+                )}
               </div>
+
+              {mode === 'signup' && (
+                <div id="confirmPasswordField">
+                  <label className="block font-mono text-xs mb-1 text-muted">Confirm Password</label>
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      id="confirmPassInput"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="input-field"
+                      placeholder="••••••••"
+                      required
+                    />
+                    <button
+                      type="button"
+                      id="toggleConfirmPasswordBtn"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      className={`password-toggle-btn ${showConfirmPassword ? 'active' : ''}`}
+                      aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                      title={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                    >
+                      <i className={`fas ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Captcha Widget */}
               <div
@@ -278,6 +424,17 @@ export default function Login() {
                   />
                 </div>
               </div>
+
+              {resetMessage && (
+                <div
+                  id="resetSuccessMsg"
+                  className="text-xs font-mono text-emerald-400 p-3 rounded border flex items-center gap-2"
+                  style={{ background: 'rgba(16, 185, 129, 0.1)', borderColor: 'rgba(16, 185, 129, 0.3)' }}
+                >
+                  <i className="fas fa-check-circle text-emerald-400 shrink-0"></i>
+                  <span>{resetMessage}</span>
+                </div>
+              )}
 
               {error && (
                 <div id="authError" className="text-xs font-mono text-red-400">
@@ -319,6 +476,125 @@ export default function Login() {
           </div>
         )}
       </div>
+
+      {/* On-Screen Forgot Password Modal Popup */}
+      {showResetModal && (
+        <div
+          className="reset-modal-overlay"
+          id="resetPasswordModal"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) handleCloseResetModal();
+          }}
+        >
+          <div className="reset-modal-box p-6 md:p-8 space-y-5">
+            <div className="flex items-center justify-between border-b pb-4" style={{ borderColor: 'var(--border)' }}>
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center font-mono text-sm"
+                  style={{ background: 'rgba(34, 211, 238, 0.1)', color: 'var(--accent)' }}
+                >
+                  <i className="fas fa-key"></i>
+                </div>
+                <h3 className="font-display font-bold text-lg" style={{ color: 'var(--fg)' }}>
+                  Reset Password
+                </h3>
+              </div>
+              <button
+                type="button"
+                id="closeResetModalBtn"
+                onClick={handleCloseResetModal}
+                className="text-muted hover:text-white transition-colors p-1"
+                aria-label="Close dialog"
+              >
+                <i className="fas fa-times text-base"></i>
+              </button>
+            </div>
+
+            <p className="text-xs text-muted leading-relaxed">
+              Enter your registered email address and we'll send you a secure link to reset your password.
+            </p>
+
+            <form onSubmit={handleModalResetSubmit} className="space-y-4">
+              <div>
+                <label className="block font-mono text-xs mb-1 text-muted">Email Address</label>
+                <input
+                  type="email"
+                  id="resetEmailInput"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  className="input-field"
+                  placeholder="developer@scaffold.dev"
+                  autoFocus
+                  required
+                />
+              </div>
+
+              {modalResetError && (
+                <div
+                  id="modalResetError"
+                  className="text-xs font-mono text-red-400 p-3 rounded border flex items-center gap-2"
+                  style={{ background: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+                >
+                  <i className="fas fa-exclamation-circle text-red-400 shrink-0"></i>
+                  <span>{modalResetError}</span>
+                </div>
+              )}
+
+              {modalResetSuccess && (
+                <div className="space-y-3">
+                  <div
+                    id="modalResetSuccess"
+                    className="text-xs font-mono text-emerald-400 p-3 rounded border flex items-center gap-2"
+                    style={{ background: 'rgba(16, 185, 129, 0.1)', borderColor: 'rgba(16, 185, 129, 0.3)' }}
+                  >
+                    <i className="fas fa-check-circle text-emerald-400 shrink-0"></i>
+                    <span>{modalResetSuccess}</span>
+                  </div>
+                  <div
+                    className="p-3 rounded border font-mono text-[11px] leading-relaxed"
+                    style={{ background: 'var(--bg-elev)', borderColor: 'var(--border)' }}
+                  >
+                    <div className="flex items-start gap-2 text-amber-400 font-bold mb-1">
+                      <i className="fas fa-envelope-open-text mt-0.5"></i> Check Spam / Junk Folder
+                    </div>
+                    <span className="text-muted">
+                      Emails from Firebase often land in Gmail's <strong>Spam</strong> or <strong>Promotions</strong> folder from <em>noreply@scaffold-app-90278.firebaseapp.com</em>.
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
+                <button
+                  type="button"
+                  id="cancelResetModalBtn"
+                  onClick={handleCloseResetModal}
+                  className="btn-secondary text-xs px-4 py-2"
+                >
+                  {modalResetSuccess ? 'Close' : 'Cancel'}
+                </button>
+                {!modalResetSuccess && (
+                  <button
+                    type="submit"
+                    id="submitResetModalBtn"
+                    disabled={isResetting}
+                    className="btn-primary text-xs px-4 py-2"
+                    style={{ background: 'var(--accent)', color: '#000' }}
+                  >
+                    {isResetting ? (
+                      <>
+                        <i className="fas fa-circle-notch fa-spin mr-1"></i> Sending...
+                      </>
+                    ) : (
+                      'Send Reset Link'
+                    )}
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

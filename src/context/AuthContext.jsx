@@ -6,7 +6,8 @@ import {
   signUpWithEmail as authSignUpWithEmail, 
   loginWithGoogle as authLoginWithGoogle, 
   logoutUser as authLogoutUser,
-  getCurrentAuthUser as authGetCurrentAuthUser
+  getCurrentAuthUser as authGetCurrentAuthUser,
+  resetPassword as authResetPassword
 } from '../firebase/authService.js';
 
 export const AuthContext = createContext(null);
@@ -57,6 +58,10 @@ export function AuthProvider({ children }) {
     return authGetCurrentAuthUser();
   }, []);
 
+  const resetPassword = useCallback(async (email) => {
+    return await authResetPassword(email);
+  }, []);
+
   const value = useMemo(() => ({
     currentUser,
     loading,
@@ -64,8 +69,9 @@ export function AuthProvider({ children }) {
     signUpWithEmail,
     loginWithGoogle,
     logoutUser,
-    getCurrentUser
-  }), [currentUser, loading, loginWithEmail, signUpWithEmail, loginWithGoogle, logoutUser, getCurrentUser]);
+    getCurrentUser,
+    resetPassword
+  }), [currentUser, loading, loginWithEmail, signUpWithEmail, loginWithGoogle, logoutUser, getCurrentUser, resetPassword]);
 
   return (
     <AuthContext.Provider value={value}>
