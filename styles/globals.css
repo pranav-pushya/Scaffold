@@ -152,6 +152,15 @@ body.theme-anim *::after {
     width: 100%;
 }
 
+.active-nav-link {
+    color: var(--accent) !important;
+    font-weight: 600;
+}
+
+.active-nav-link::after {
+    width: 100% !important;
+}
+
 /* Theme Toggle */
 .theme-toggle {
     display: inline-flex;
