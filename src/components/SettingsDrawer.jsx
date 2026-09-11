@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth.js';
+import { getProfile, getProjects } from '../firebase/firestoreService.js';
 
 export default function SettingsDrawer({ isOpen, onClose }) {
   const { currentUser } = useAuth();
@@ -36,18 +37,39 @@ export default function SettingsDrawer({ isOpen, onClose }) {
     setTimeout(() => setLinkCopied(false), 2500);
   };
 
-  // --- Setting 8: Cloud Auto-Sync Status ---
+  // --- Setting 8: Cloud Data Sync Status ---
   const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState('Just now');
+  const [lastSyncTime, setLastSyncTime] = useState('On page load');
 
-  const handleManualSync = () => {
+  const handleManualSync = async () => {
     if (isSyncing) return;
     setIsSyncing(true);
-    setTimeout(() => {
+    try {
+      if (currentUser?.uid) {
+        const [profileData, projectsData] = await Promise.all([
+          getProfile(currentUser.uid).catch(err => {
+            console.warn('Profile sync warning:', err);
+            return null;
+          }),
+          getProjects(currentUser.uid).catch(err => {
+            console.warn('Projects sync warning:', err);
+            return null;
+          })
+        ]);
+        if (profileData && Object.keys(profileData).length > 0) {
+          localStorage.setItem('scaffold_profile_store', JSON.stringify(profileData));
+        }
+        if (Array.isArray(projectsData) && projectsData.length > 0) {
+          localStorage.setItem('scaffold_tracker_store', JSON.stringify(projectsData));
+        }
+      }
+    } catch (err) {
+      console.warn('Manual sync error:', err);
+    } finally {
       setIsSyncing(false);
       const now = new Date();
       setLastSyncTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-    }, 900);
+    }
   };
 
   // --- Category 1: 💾 Data Management & Backup ---
@@ -575,24 +597,24 @@ export default function SettingsDrawer({ isOpen, onClose }) {
             </div>
           </section>
 
-          {/* SECTION 4: Setting 8 - Cloud Auto-Sync Status */}
+          {/* SECTION 4: Setting 8 - Cloud Data Sync Status */}
           <section className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <i className="fas fa-cloud text-xs" style={{ color: 'var(--accent)' }}></i>
                 <h3 className="font-mono text-xs font-semibold uppercase tracking-wider text-muted">
-                  Cloud Auto-Sync
+                  Cloud Data Sync
                 </h3>
               </div>
               <span
                 className="font-mono text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider"
                 style={{
-                  background: 'rgba(16, 185, 129, 0.15)',
-                  color: '#10b981',
-                  border: '1px solid rgba(16, 185, 129, 0.3)'
+                  background: currentUser ? 'rgba(16, 185, 129, 0.15)' : 'rgba(234, 179, 8, 0.15)',
+                  color: currentUser ? '#10b981' : '#eab308',
+                  border: currentUser ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(234, 179, 8, 0.3)'
                 }}
               >
-                ● Connected
+                {currentUser ? '● Cloud Connected' : '○ Local Session'}
               </span>
             </div>
 
@@ -603,15 +625,15 @@ export default function SettingsDrawer({ isOpen, onClose }) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="relative flex items-center justify-center">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 absolute animate-ping opacity-75"></span>
+                    <span className={`w-2.5 h-2.5 rounded-full ${currentUser ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                    {currentUser && <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 absolute animate-ping opacity-75"></span>}
                   </div>
                   <div>
                     <div className="font-mono text-xs font-bold" style={{ color: 'var(--fg)' }}>
                       Firebase Firestore Sync
                     </div>
                     <div className="text-[11px] text-muted truncate max-w-[200px]">
-                      {currentUser ? currentUser.email : 'Local Session (Sign in for sync)'}
+                      {currentUser ? currentUser.email : 'Local Session (Sign in to sync)'}
                     </div>
                   </div>
                 </div>
@@ -622,7 +644,7 @@ export default function SettingsDrawer({ isOpen, onClose }) {
                   disabled={isSyncing}
                   className="btn-secondary text-xs px-2.5 py-1.5 flex items-center gap-1.5"
                   style={{ fontSize: '11px', padding: '5px 10px' }}
-                  title="Force re-sync with Firestore"
+                  title="Re-sync workspace data with Firestore"
                 >
                   <i className={`fas fa-sync-alt ${isSyncing ? 'animate-spin text-emerald-400' : ''}`}></i>
                   <span>{isSyncing ? 'Syncing...' : 'Sync Now'}</span>
@@ -633,7 +655,10 @@ export default function SettingsDrawer({ isOpen, onClose }) {
                 className="pt-2 border-t flex items-center justify-between font-mono text-[11px] text-muted"
                 style={{ borderColor: 'var(--border)' }}
               >
-                <span>Status: Realtime Active</span>
+                <span className="flex items-center gap-1.5">
+                  <span className={`w-1.5 h-1.5 rounded-full ${isSyncing ? 'bg-emerald-400 animate-pulse' : (currentUser ? 'bg-emerald-500' : 'bg-amber-400')}`}></span>
+                  Status: {isSyncing ? 'Syncing...' : (currentUser ? 'Synced' : 'Local Only')}
+                </span>
                 <span>Last sync: {lastSyncTime}</span>
               </div>
             </div>

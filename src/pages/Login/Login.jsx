@@ -176,7 +176,7 @@ export default function Login() {
           style={{ background: 'var(--bg-elev)', borderRight: '1px solid var(--border)' }}
         >
           <div>
-            <span className="tag mb-4 inline-block">PBE-I Authentication</span>
+            <span className="tag mb-4 inline-block">PBE-II Authentication</span>
             <h2 className="font-display text-3xl font-black mb-4">
               Welcome to <span style={{ color: 'var(--accent)' }}>&lt;/S&gt;</span>caffold
             </h2>
