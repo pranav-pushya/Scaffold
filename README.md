@@ -1,9 +1,33 @@
 <div align="center">
 
-<!-- > [!IMPORTANT]
+# <code>&lt;/S&gt;caffold</code> — Developer Workspace & Identity OS
+
+**A unified, closed-loop developer workspace connecting identity, task tracking, ambient AI copilot, live showcase, and ATS resume compilation.**
+
+[![Chitkara University](https://img.shields.io/badge/Chitkara%20University-CSE--25CSE0203-blue?style=for-the-badge)](https://www.chitkara.edu.in/)
+[![Group](https://img.shields.io/badge/Group-3G5-orange?style=for-the-badge)](#-team--module-ownership)
+[![React](https://img.shields.io/badge/React-18%2F19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Firebase](https://img.shields.io/badge/Firebase-Auth%20%26%20Firestore-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![Groq AI](https://img.shields.io/badge/Groq%20AI-Llama%20%2F%20GPT--OSS-f55036?style=for-the-badge)](https://groq.com/)
+[![License](https://img.shields.io/badge/License-Proprietary%20Academic-red?style=for-the-badge)](#-proprietary-academic-notice-not-open-source)
+
+---
+
+### 🌐 Live Production Deployment
+**Production URL**: [https://scaffold-app-90278.web.app](https://scaffold-app-90278.web.app)  
+*Continuous deployment via Firebase Hosting with SPA client-side rewrite rules.*
+
+---
+
+</div>
+
+> [!IMPORTANT]
 > ### 🔒 PROPRIETARY ACADEMIC WORK — NOT OPEN SOURCE
 > **This repository and codebase are NOT open source.**  
-> This project is a proprietary academic engineering evaluation submission for **Chitkara University (Course 25CSE0203 — Front End Engineering-II)** by **Group 3G5**. It is **NOT** licensed under MIT, Apache, GPL, BSD, or any other open-source or copyleft license. No commercial rights, re-distribution permissions, public re-hosting rights, or assignment re-use rights are granted. See the [full proprietary notice](#-proprietary-academic-notice-not-open-source) at the bottom of this document. -->
+> This project is a proprietary academic engineering evaluation submission for **Chitkara University (Course 25CSE0203 — Front End Engineering-II)** by **Group 3G5**. It is **NOT** licensed under MIT, Apache, GPL, BSD, or any other open-source or copyleft license. No commercial rights, re-distribution permissions, public re-hosting rights, or assignment re-use rights are granted. See the [full proprietary notice](#-proprietary-academic-notice-not-open-source) at the bottom of this document.
+
+---
 
 ## 📌 Executive Summary
 
@@ -29,9 +53,7 @@ Modern developers often scatter their identity across disconnected tools: a Mark
 ## ⚡ Key Highlights & Core Capabilities
 
 ### 1. 🎛️ Workspace Settings Slide-Over Drawer
-
 Accessible via the navbar gear icon or pressing <kbd>?</kbd> / <kbd>Shift + /</kbd>:
-
 - **💾 Data Management & Backup**:
   - **Export JSON**: Download a complete backup of workspace state (profile, projects, and UI preferences).
   - **Import JSON**: Restore or merge workspace state from a backup file with automatic schema validation.
@@ -54,7 +76,6 @@ Accessible via the navbar gear icon or pressing <kbd>?</kbd> / <kbd>Shift + /</k
 ---
 
 ### 2. 🤖 Dual-Tier AI Intelligence Architecture
-
 Scaffold deliberately implements **two distinct AI touchpoints** engineered for different user intents:
 
 ```
@@ -72,63 +93,60 @@ Scaffold deliberately implements **two distinct AI touchpoints** engineered for 
 └────────────────────────────────────┴────────────────────────────────────┘
 ```
 
-- **Shared Service Layer ([`aiService.js`](file:///d:/Coding/SEM3/FEE/Scaffold/scaffold/src/services/aiService.js))**: Both components share a single, unified Groq Cloud API service (`openai/gpt-oss-20b`), ensuring zero duplicate network code and consistent error handling.
+- **Shared Service Layer (`src/services/aiService.js`)**: Both components share a single, unified Groq Cloud API service (`openai/gpt-oss-20b`), ensuring zero duplicate network code and consistent error handling.
 - **Strict Ambient Guardrails**: If an off-topic query (e.g. *"what is React"*, *"explain closures"*) or deep-work query (e.g. *"write my whole resume"*) is sent to `AiBubble`, it politely redirects the user to the appropriate tool.
 
 ---
 
 ### 3. ⌨️ Keyboard Accelerators & Master Shortcut Reference
-
 Scaffold is engineered as a keyboard-first Developer OS. Every primary action, route transition, and dialog can be triggered via hardware keystrokes:
 
-| Shortcut                                         | Action                          | Scope           | Description                                                                        |
-| ------------------------------------------------ | ------------------------------- | --------------- | ---------------------------------------------------------------------------------- |
-| <kbd>Ctrl + K</kbd> or <kbd>/</kbd>              | **Command Palette**       | Global          | Opens fuzzy command & search palette with keyboard navigation                      |
-| <kbd>Alt + F</kbd>                               | **Toggle Full Screen**    | Global          | Enters/exits native HTML5 full-screen mode with on-screen exit badge               |
-| <kbd>Alt + 1</kbd>                               | **Navigate to Home**      | Global          | Jump to`/` (Landing Page)                                                        |
-| <kbd>Alt + 2</kbd>                               | **Navigate to Dashboard** | Global          | Jump to`/dashboard` (Developer Metrics & ATS Index)                              |
-| <kbd>Alt + 3</kbd>                               | **Navigate to Profile**   | Global          | Jump to`/profile` (Developer Identity Hub)                                       |
-| <kbd>Alt + 4</kbd>                               | **Navigate to Tracker**   | Global          | Jump to`/tracker` (Kanban Task Board)                                            |
-| <kbd>Alt + 5</kbd>                               | **Navigate to Portfolio** | Global          | Jump to`/portfolio` (Live Showcase)                                              |
-| <kbd>Alt + 6</kbd>                               | **Navigate to Resume**    | Global          | Jump to`/resume` (ATS Printable Sheet)                                           |
-| <kbd>Alt + 7</kbd>                               | **Navigate to Assistant** | Global          | Jump to`/assistant` (Deep-Work AI Workspace)                                     |
-| <kbd>Alt + N</kbd>                               | **Quick Add Card**        | Tracker         | Opens new project task creation modal                                              |
-| <kbd>Alt + E</kbd> / <kbd>Ctrl + P</kbd>         | **Export / Print Resume** | Global / Resume | Triggers browser-native`@media print` PDF generator                              |
-| <kbd>Alt + A</kbd>                               | **Focus AI Copilot**      | Global          | Opens or focuses the ambient bottom-right AI bubble                                |
-| <kbd>Alt + L</kbd>                               | **Sign Out Modal**        | Global          | Triggers account sign-out confirmation dialog                                      |
-| <kbd>?</kbd> or <kbd>Shift + /</kbd>             | **Workspace Settings**    | Global          | Slides out the Settings & Backup drawer                                            |
-| <kbd>T</kbd>                                     | **Cycle Theme**           | Global          | Cycles between**Dark**, **Light**, and **Cyber** (CRT Scanlines) |
-| <kbd>Esc</kbd>                                   | **Dismiss Modal/Drawer**  | Global          | Universally closes open popups, drawers, or command palette                        |
-| <kbd>↑</kbd> / <kbd>↓</kbd> + <kbd>Enter</kbd> | **Palette Navigation**    | Modal           | Traverses command palette items with auto-scrolling viewport                       |
+| Shortcut | Action | Scope | Description |
+|---|---|---|---|
+| <kbd>Ctrl + K</kbd> or <kbd>/</kbd> | **Command Palette** | Global | Opens fuzzy command & search palette with keyboard navigation |
+| <kbd>Alt + F</kbd> | **Toggle Full Screen** | Global | Enters/exits native HTML5 full-screen mode with on-screen exit badge |
+| <kbd>Alt + 1</kbd> | **Navigate to Home** | Global | Jump to `/` (Landing Page) |
+| <kbd>Alt + 2</kbd> | **Navigate to Dashboard** | Global | Jump to `/dashboard` (Developer Metrics & ATS Index) |
+| <kbd>Alt + 3</kbd> | **Navigate to Profile** | Global | Jump to `/profile` (Developer Identity Hub) |
+| <kbd>Alt + 4</kbd> | **Navigate to Tracker** | Global | Jump to `/tracker` (Kanban Task Board) |
+| <kbd>Alt + 5</kbd> | **Navigate to Portfolio** | Global | Jump to `/portfolio` (Live Showcase) |
+| <kbd>Alt + 6</kbd> | **Navigate to Resume** | Global | Jump to `/resume` (ATS Printable Sheet) |
+| <kbd>Alt + 7</kbd> | **Navigate to Assistant** | Global | Jump to `/assistant` (Deep-Work AI Workspace) |
+| <kbd>Alt + N</kbd> | **Quick Add Card** | Tracker | Opens new project task creation modal |
+| <kbd>Alt + E</kbd> / <kbd>Ctrl + P</kbd> | **Export / Print Resume** | Global / Resume | Triggers browser-native `@media print` PDF generator |
+| <kbd>Alt + A</kbd> | **Focus AI Copilot** | Global | Opens or focuses the ambient bottom-right AI bubble |
+| <kbd>Alt + L</kbd> | **Sign Out Modal** | Global | Triggers account sign-out confirmation dialog |
+| <kbd>?</kbd> or <kbd>Shift + /</kbd> | **Workspace Settings** | Global | Slides out the Settings & Backup drawer |
+| <kbd>T</kbd> | **Cycle Theme** | Global | Cycles between **Dark**, **Light**, and **Cyber** (CRT Scanlines) |
+| <kbd>Esc</kbd> | **Dismiss Modal/Drawer** | Global | Universally closes open popups, drawers, or command palette |
+| <kbd>↑</kbd> / <kbd>↓</kbd> + <kbd>Enter</kbd> | **Palette Navigation** | Modal | Traverses command palette items with auto-scrolling viewport |
 
 ---
 
 ### 4. 📊 Developer Modules Breakdown
 
-| Module                       | Route          | Key Capabilities                                                                                                                                                                |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Terminal Boot**      | `/boot`      | Animated terminal boot sequence simulating hardware checks and environment setup.                                                                                               |
-| **Authentication**     | `/login`     | Firebase Auth (Email/Password + Google OAuth), custom math Security Check challenge, password visibility toggles, and self-service password reset.                              |
-| **Home OS**            | `/`          | Platform entry point with interactive metrics, tech stack tags, and quick-action triggers.                                                                                      |
-| **Dashboard**          | `/dashboard` | Developer OS overview with automated**Profile Readiness %**, **ATS Index Score (0–100)**, Kanban project metrics, and AI career cards.                             |
-| **Profile Hub**        | `/profile`   | Comprehensive developer identity form (target role, languages, frameworks, dev tools, bio, education, social links) synced to Cloud Firestore.                                  |
-| **Kanban Tracker**     | `/tracker`   | Drag-and-drop task board with**To-Do**, **In Progress**, and **Done** columns, real-time CRUD, status dropdowns, and search filtering.                        |
-| **Portfolio Showcase** | `/portfolio` | Live public developer showcase auto-populated from completed tracker projects and verified skills. Includes shareable link generator.                                           |
-| **ATS Resume Sheet**   | `/resume`    | Standardized, single-page ATS-compliant resume compiled directly from profile and project history. Exportable to PDF using browser-native`@media print` styling.              |
-| **AI Assistant**       | `/assistant` | Deep-work generative intelligence console with 4 dedicated coaching modes:*ATS Resume Coach*, *Project Inspiration*, *Portfolio Bio Writer*, and *System Architecture*. |
+| Module | Route | Key Capabilities |
+|---|---|---|
+| **Terminal Boot** | `/boot` | Animated terminal boot sequence simulating hardware checks and environment setup. |
+| **Authentication** | `/login` | Firebase Auth (Email/Password + Google OAuth), custom math Security Check challenge, password visibility toggles, and self-service password reset. |
+| **Home OS** | `/` | Platform entry point with interactive metrics, tech stack tags, and quick-action triggers. |
+| **Dashboard** | `/dashboard` | Developer OS overview with automated **Profile Readiness %**, **ATS Index Score (0–100)**, Kanban project metrics, and AI career cards. |
+| **Profile Hub** | `/profile` | Comprehensive developer identity form (target role, languages, frameworks, dev tools, bio, education, social links) synced to Cloud Firestore. |
+| **Kanban Tracker** | `/tracker` | Drag-and-drop task board with **To-Do**, **In Progress**, and **Done** columns, real-time CRUD, status dropdowns, and search filtering. |
+| **Portfolio Showcase** | `/portfolio` | Live public developer showcase auto-populated from completed tracker projects and verified skills. Includes shareable link generator. |
+| **ATS Resume Sheet** | `/resume` | Standardized, single-page ATS-compliant resume compiled directly from profile and project history. Exportable to PDF using browser-native `@media print` styling. |
+| **AI Assistant** | `/assistant` | Deep-work generative intelligence console with 4 dedicated coaching modes: *ATS Resume Coach*, *Project Inspiration*, *Portfolio Bio Writer*, and *System Architecture*. |
 
 ---
 
 ### 5. 📈 ATS Scoring Algorithm & Profile Readiness Engine
-
 Scaffold incorporates a real-time mathematical scoring engine in `Dashboard.jsx` that computes two distinct developer benchmarks:
 
 1. **Profile Readiness Index (0–100%)**:
-
    - Evaluates form completion: Name, Target Role, Contact Details, Bio (>50 chars), Skills (Languages, Frameworks, Tools), and Education.
    - Provides granular missing-field checklists to guide developers toward a complete profile.
-2. **ATS Optimization Score (0–100 Index)**:
 
+2. **ATS Optimization Score (0–100 Index)**:
    - Evaluates resume competitiveness based on real industry hiring criteria:
      - **Contact & Role Clarity (25%)**: Complete title, email, phone, location, and GitHub/LinkedIn URLs.
      - **Skill Density & Categorization (30%)**: Structured balance of programming languages, modern frameworks, and developer tooling.
@@ -179,15 +197,15 @@ Scaffold incorporates a real-time mathematical scoring engine in `Dashboard.jsx`
 
 ## 🛠️ Technical Stack & Dependencies
 
-| Layer                             | Technologies                         | Version / Details                                 |
-| --------------------------------- | ------------------------------------ | ------------------------------------------------- |
-| **Core Framework**          | React, ReactDOM                      | `^19.2.8` / React 18 Compatibility Mode         |
-| **Application Routing**     | React Router DOM                     | `^7.18.3` (Declarative Client-Side SPA Routing) |
-| **Build & Tooling**         | Vite,`@vitejs/plugin-react`        | `^5.4.21` (Fast HMR & Rollup Bundler)           |
-| **Cloud Infrastructure**    | Google Firebase Platform             | `^12.17.1` (Auth, Cloud Firestore, Hosting)     |
-| **AI / LLM Engine**         | Groq Cloud API                       | Model:`openai/gpt-oss-20b` (REST endpoint)      |
-| **Styling & Design Tokens** | Tailwind CSS + CSS Custom Properties | Multi-theme token engine (Dark, Light, Cyber)     |
-| **Iconography**             | FontAwesome CDN                      | FontAwesome 6.4.0 SVG & Webfonts                  |
+| Layer | Technologies | Version / Details |
+|---|---|---|
+| **Core Framework** | React, ReactDOM | `^19.2.8` / React 18 Compatibility Mode |
+| **Application Routing** | React Router DOM | `^7.18.3` (Declarative Client-Side SPA Routing) |
+| **Build & Tooling** | Vite, `@vitejs/plugin-react` | `^5.4.21` (Fast HMR & Rollup Bundler) |
+| **Cloud Infrastructure** | Google Firebase Platform | `^12.17.1` (Auth, Cloud Firestore, Hosting) |
+| **AI / LLM Engine** | Groq Cloud API | Model: `openai/gpt-oss-20b` (REST endpoint) |
+| **Styling & Design Tokens** | Tailwind CSS + CSS Custom Properties | Multi-theme token engine (Dark, Light, Cyber) |
+| **Iconography** | FontAwesome CDN | FontAwesome 6.4.0 SVG & Webfonts |
 
 ---
 
@@ -195,11 +213,11 @@ Scaffold incorporates a real-time mathematical scoring engine in `Dashboard.jsx`
 
 This project is an academic engineering submission for **Chitkara University (25CSE0203 — Front End Engineering-II)** by **Group 3G5**:
 
-| Member                           | Primary Ownership                | Managed Files & Architecture                                                                                                                                     |
-| -------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Tiksha** *(Team Lead)* | UI/UX & Design Tokens            | `styles/globals.css`, `Navbar.jsx`, `Footer.jsx`, `Home.jsx`, component stylesheets, responsive viewports                                                |
-| **Tammana**                | Routing, Forms & Page Logic      | `App.jsx` routes, `Login.jsx`, `Profile.jsx`, `Dashboard.jsx`, `Tracker.jsx`, `Portfolio.jsx`, `Resume.jsx`                                        |
-| **Pranav Pushya**          | Firebase, State, AI & Deployment | `src/firebase/*`, `src/services/aiService.js`, `src/components/AiBubble.jsx`, `SettingsDrawer.jsx`, `CommandPalette.jsx`, Context state, CI/CD Hosting |
+| Member | Primary Ownership | Managed Files & Architecture |
+|---|---|---|
+| **Tiksha** *(Team Lead)* | UI/UX & Design Tokens | `styles/globals.css`, `Navbar.jsx`, `Footer.jsx`, `Home.jsx`, component stylesheets, responsive viewports |
+| **Tammana** | Routing, Forms & Page Logic | `App.jsx` routes, `Login.jsx`, `Profile.jsx`, `Dashboard.jsx`, `Tracker.jsx`, `Portfolio.jsx`, `Resume.jsx` |
+| **Pranav Pushya** | Firebase, State, AI & Deployment | `src/firebase/*`, `src/services/aiService.js`, `src/components/AiBubble.jsx`, `SettingsDrawer.jsx`, `CommandPalette.jsx`, Context state, CI/CD Hosting |
 
 ---
 
@@ -266,26 +284,24 @@ scaffold/
 ## ⚙️ Local Development & Evaluation Setup
 
 ### Prerequisites
-
 - **Node.js**: v18.x or higher
 - **npm**: v9.x or higher
 
 ### Step-by-Step Installation
 
 1. **Clone the repository**:
-
    ```bash
    git clone https://github.com/pranav-pushya/Scaffold.git
    cd Scaffold/scaffold
    ```
-2. **Install project dependencies**:
 
+2. **Install project dependencies**:
    ```bash
    npm install
    ```
+
 3. **Configure Environment Variables**:
    Create a `.env` file in the project root containing your Firebase and Groq credentials:
-
    ```env
    VITE_FIREBASE_API_KEY=your_firebase_api_key
    VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
@@ -295,19 +311,17 @@ scaffold/
    VITE_FIREBASE_APP_ID=your_app_id
    VITE_GROQ_API_KEY=your_groq_api_key
    ```
-4. **Start the local development server**:
 
+4. **Start the local development server**:
    ```bash
    npm run dev
    ```
-
    Open `http://localhost:5173` in your browser.
-5. **Execute Production Build**:
 
+5. **Execute Production Build**:
    ```bash
    npm run build
    ```
-
    Compiles assets into `dist/` with code-splitting and asset optimization.
 
 ---
@@ -331,23 +345,18 @@ To maintain academic integrity and technical accuracy, the following architectur
 ## 🎓 Viva & Architectural Defense Q&A
 
 ### Q1: Why use React Context instead of Redux Toolkit or Zustand?
-
 > **Answer**: Scaffold manages three coherent data streams: authentication identity (`AuthContext`), developer profile attributes (`ProfileContext`), and Kanban project cards (`TrackerContext`). Because the update frequency is user-driven (submitting forms or moving Kanban cards) rather than high-frequency streaming ticks, React's built-in Context API coupled with custom hooks provides clean, dependency-free state synchronization without the bundle overhead of Redux.
 
 ### Q2: How does the dual-tier AI architecture prevent redundancy?
-
 > **Answer**: `AiBubble.jsx` and `Assistant.jsx` serve complementary user intents. `AiBubble` acts as an ambient site concierge: it answers platform navigation questions, provides keyboard shortcut reminders, and looks up live profile metrics without interrupting the user's flow. In contrast, `Assistant.jsx` is a dedicated deep-work console designed for heavy generation (5-stage system design blueprints, multi-section resume audits). Both components share a single client service layer (`src/services/aiService.js`), eliminating code duplication.
 
 ### Q3: Why is Firestore structured with a subcollection (`profiles/{userId}/projects`) instead of a root `projects` collection?
-
 > **Answer**: Subcollections enforce a clean security boundary. A single security rule:
->
 > ```javascript
 > match /profiles/{userId}/{document=**} {
 >   allow read, write: if request.auth != null && request.auth.uid == userId;
 > }
 > ```
->
 > securely protects both the user profile document and all underlying project tasks with a single permission check. This completely prevents multi-tenant data bleed.
 
 ---
@@ -373,12 +382,11 @@ To demonstrate genuine engineering problem-solving rather than boilerplate gener
 ## 🔒 Proprietary Academic Notice (NOT Open Source)
 
 > ### ⚠️ STRICT PROPRIETARY NOTICE
->
-> **This repository and its codebase are NOT open source.**
->
+> **This repository and its codebase are NOT open source.**  
+> 
 > This project is the exclusive intellectual property of **Tiksha**, **Tammana**, and **Pranav Pushya**, developed as an official academic engineering evaluation project for **Course 25CSE0203 (Front End Engineering-II)** at **Chitkara University**.
->
-> - **No Open Source License**: No license (MIT, Apache, GPL, etc.) is granted.
+> 
+> - **No Open Source License**: No license (MIT, Apache, GPL, BSD, etc.) is granted.
 > - **Prohibited Actions**: Any unauthorized copying, commercial distribution, public re-hosting, assignment plagiarism, or reproduction of this source code without the express written permission of the authors and Chitkara University is strictly prohibited.
->
+> 
 > *Copyright © 2026 Tiksha, Tammana, Pranav Pushya — All Rights Reserved.*
