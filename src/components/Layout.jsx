@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar.jsx';
 import Footer from './Footer.jsx';
 import CommandPalette from './CommandPalette.jsx';
+import AiBubble from './AiBubble.jsx';
 import { useGlobalShortcuts } from '../hooks/useGlobalShortcuts.js';
 
 export default function Layout() {
@@ -103,6 +104,9 @@ export default function Layout() {
       </main>
 
       <Footer />
+
+      {/* Ambient Floating AI Copilot */}
+      <AiBubble />
 
       {/* Global Command Palette */}
       <CommandPalette
