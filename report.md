@@ -160,6 +160,10 @@ This is the most viva-relevant section — it demonstrates genuine debugging, no
 - **What happened**: 9 stylesheet `<link>` tags still pointed at `js/pages/*/*.css` even though every React page now imports its own CSS directly.
 - **Fix**: removed the legacy links from `index.html` before deleting the `js/` folder, to avoid 404s.
 
+### 6.16 Settings Drawer "Realtime Active" sync label overclaim
+- **What happened**: The newly built Workspace Settings drawer displayed "Status: Realtime Active" under Cloud Auto-Sync, implying live WebSocket synchronization with Firestore. An audit revealed zero `onSnapshot()` listeners exist in the project — all Firestore reads are one-time `getDoc`/`getDocs` calls.
+- **Fix**: Replaced the label with honest status reporting (`Status: Synced` when authenticated, `Status: Syncing...` during transfer, `Status: Local Only` in guest sessions, accompanied by exact timestamp `Last sync: [time]`). Connected the "Sync Now" button to actually trigger `getProfile(uid)` and `getProjects(uid)` to refresh local client caches on demand.
+
 ---
 
 ## 7. Deployment History
@@ -188,9 +192,9 @@ This is the most viva-relevant section — it demonstrates genuine debugging, no
 - AI Assistant — Groq-powered, context-aware (reads live profile/project data), multiple modes (ATS Coach, Project Ideas, Portfolio Bio, System Design)
 
 ### 8.2 Added post-PBE-I (during React migration)
-- **Workspace Settings drawer**: JSON export/import of full workspace state, "Purge Local Cache," Reduce Motion toggle, Compact Density toggle, Default Landing Route selector, Portfolio Visibility (Public/Private) with shareable link, Cloud Auto-Sync status indicator, keyboard shortcuts reference, System Information panel.
+- **Workspace Settings drawer**: JSON export/import of full workspace state, "Purge Local Cache," Reduce Motion toggle, Compact Density toggle, Default Landing Route selector, Portfolio Visibility (Public/Private) with shareable link, Cloud Data Sync status indicator with genuine on-demand Firestore re-fetch, keyboard shortcuts reference, System Information panel.
 - **Command Palette** (`Ctrl+K` or `/`): fuzzy navigation to any page, shown with keyboard shortcut hints (Alt+1 through Alt+7 for page navigation, Alt+N/E/A/F/L for actions, `T` for theme cycling).
-- ⚠️ **To verify**: the Settings drawer's "Realtime Active" sync-status label — confirm this is accurate (i.e. `onSnapshot` is actually in use) before treating it as final; if the app is still using one-time fetches, this label should be corrected to avoid the same overclaim pattern seen elsewhere in this log (see 6.2, 6.3).
+- **Verified Cloud Sync label audit (no `onSnapshot` used)**: Audited the entire codebase for Firestore's `onSnapshot()` real-time listener — confirmed zero occurrences. All database operations are point-in-time SDK queries (`getDoc`/`getDocs`/`setDoc`/`updateDoc`). The Settings drawer was updated to reflect this honestly: section retitled "Cloud Data Sync", label changed from misleading "Status: Realtime Active" to "Status: Synced" / "Status: Local Only" alongside "Last sync: [timestamp]", and "Sync Now" button wired to perform an authentic cloud re-fetch.
 
 ### 8.3 Bug-fix batch (post-migration polish)
 - Password show/hide eye icon on Login
@@ -229,7 +233,7 @@ Migration is staged and phase-gated — each phase is built, tested, and confirm
 
 ## 11. Open Items / Next Steps
 
-- [ ] Verify the Settings drawer's "Realtime Active" label is accurate; correct if not.
+- [x] Verify the Settings drawer's "Realtime Active" label is accurate; corrected to "Status: Synced" / "Last sync" after confirming no `onSnapshot` in codebase.
 - [ ] Full regression test of the new Settings drawer + Command Palette (Export/Import JSON, Purge Cache, all keyboard shortcuts) to confirm each is genuinely functional, not just visual.
 - [ ] Merge `react-migration` into `main` once fully verified; redeploy from `main` going forward.
 - [ ] PBE-II scope build-out: deeper hooks usage (useMemo/useCallback/custom hooks), Jest/RTL testing, performance optimization (lazy loading, code splitting), per the course plan.
