@@ -200,6 +200,9 @@ This is the most viva-relevant section — it demonstrates genuine debugging, no
   - **Data Access & Scope**: Reads live data from `ProfileContext` (name, target role, technical skills, profile readiness, estimated ATS score) and `TrackerContext` (total project count, completed/done count, in-progress tasks), paired with a static local knowledge engine for instantaneous navigation and feature answers (shortcuts guide, making portfolio public, resume export, workspace data backup).
   - **Shared API Integration**: Reuses the exact same Groq Cloud API configuration as `Assistant.jsx` via a unified `src/services/aiService.js` (same endpoint, same `openai/gpt-oss-20b` model, same `VITE_GROQ_API_KEY`).
   - **Deliberate Non-Duplication**: Purposely excludes heavy multi-mode tabs, deep prompting pipelines, and long conversation persistence. When heavy prompts (e.g. detailed resume rewrite, 5+ project architectures) are detected, it supplies a concise summary and guides the user to the dedicated Assistant page (`/assistant`).
+- **README & Proprietary Academic Licensing Overhaul**:
+  - Overhauled `README.md` into a comprehensive, professional developer OS specification detailing the closed-loop architecture, dual-tier AI touchpoints, Command Palette, Settings Drawer, master keyboard shortcuts table, ATS scoring algorithm, and viva defense Q&A.
+  - Formally designated the repository as **NOT Open Source** (Proprietary Academic Submission for Chitkara University Course 25CSE0203 by Group 3G5). Updated `package.json` with `"license": "UNLICENSED"` and `"private": true`, preventing accidental open-source package publication or indexing under permissive licenses.
 
 ### 8.3 Bug-fix batch (post-migration polish)
 - Password show/hide eye icon on Login

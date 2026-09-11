@@ -16,7 +16,8 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "private": true,
+  "license": "UNLICENSED",
   "bugs": {
     "url": "https://github.com/pranav-pushya/Scaffold/issues"
   },
