@@ -173,6 +173,7 @@ This is the most viva-relevant section — it demonstrates genuine debugging, no
 | Initial Firebase Hosting deploy (vanilla JS) | Live at scaffold-app-90278.web.app |
 | Post-Firestore-fix redeploy | Confirmed real Auth/Firestore working in production |
 | React migration deploys | Deployed from `react-migration` branch during testing; merge to `main` planned once migration is fully stable, with `main` as the sole deploy source going forward |
+| Post-README & proprietary license overhaul deploy | Rebuilt with Vite and deployed production assets from `main` (commit `f43c4ac`) to Firebase Hosting (`https://scaffold-app-90278.web.app`) |
 
 **Standing gotcha to remember**: `firebase deploy` always deploys whatever branch/build is currently checked out locally — always confirm `git status`/branch and run `npm run build` fresh before every `firebase deploy`.
 
