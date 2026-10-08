@@ -49,6 +49,7 @@ If the developer updates their target role, adds a skill, or finishes a project 
 | **Database**                | Google Cloud Firestore                               | `^12.17.1`             | NoSQL document database (`profiles/{userId}` and `projects` subcollections) with forced HTTP long-polling |
 | **Hosting Infrastructure**  | Firebase Hosting                                     | Production CLI           | Global CDN distribution with Single Page Application rewrite rules (`index.html`)                           |
 | **AI / LLM Engine**         | Groq Cloud API                                       | REST Completions         | Ultra-low latency chat inference powered by`openai/gpt-oss-20b`                                             |
+| **Testing & QA Engine**     | Vitest + React Testing Library                       | `^2.1.9` / `^16.3.2`     | Unit, component, and integration test suites, DOM assertions (`@testing-library/jest-dom`, `jsdom`)          |
 | **Styling & Design System** | Tailwind CSS + Custom Tokens                         | CSS3 Variables           | Multi-theme token engine (Dark obsidian, Light parchment, Cyber CRT scanlines)                                |
 | **Typography & Icons**      | Space Grotesk, JetBrains Mono, Fraunces, FontAwesome | Web CDN / 6.4.0          | Monospace terminals, elegant display serif headings, and developer glyphs                                     |
 
@@ -61,7 +62,7 @@ Per Chitkara University Course Guidelines for Group 3G5:
 | Team Member                      | Module Ownership                 | Core Managed Files & Technical Scope                                                                                                                                                                                                                                                                             |
 | -------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Tiksha** *(Team Lead)* | UI/UX & Design Tokens            | Design system architecture,`styles/themes.css`, `styles/globals.css`, `Navbar.jsx`, `Footer.jsx`, `Home.jsx`, responsive media queries, cyber CRT scanlines, and animation tokens.                                                                                                                     |
-| **Tammana**                | Routing, Forms & Page Logic      | Route configurations in`App.jsx`, `Login.jsx` authentication form, `Profile.jsx` controlled forms, `Dashboard.jsx` scoring logic, `Tracker.jsx` Kanban board, `Portfolio.jsx` showcase, and `Resume.jsx` ATS compilation.                                                                          |
+| **Tammana**                | Routing, Forms & Page Logic      | Route configurations in`App.jsx`, `NotFound.jsx`, `Login.jsx` authentication form, `Profile.jsx` controlled forms, `Dashboard.jsx` scoring logic, `Tracker.jsx` Kanban board, `Portfolio.jsx` showcase, and `Resume.jsx` ATS compilation.                                                                          |
 | **Pranav Pushya**          | Firebase, State, AI & Deployment | Cloud Firestore integration (`src/firebase/*`), Context state providers (`AuthContext`, `ProfileContext`, `TrackerContext`, `ThemeContext`), Groq AI service (`aiService.js`), ambient copilot (`AiBubble.jsx`), `SettingsDrawer.jsx`, `CommandPalette.jsx`, and Firebase Hosting deployments. |
 
 ---
@@ -977,7 +978,8 @@ export function ProtectedRoute({ children }) {
 The Custom 404 Not Found page provides a graceful, terminal-themed diagnostic interface when a user or recruiter accesses an invalid or non-existent URL (e.g. `/xyz`, `/admin`, `/unknown-page`). Rather than crashing, redirecting unexpectedly to the login portal, or showing a blank page, it displays an error screen consistent with Scaffold's developer-centric terminal aesthetic.
 
 Features:
-- **Terminal Diagnostic Aesthetic**: Displays window action pills (red/yellow/green), a mock command invocation (`curl -I https://scaffold.dev{pathname}`), and simulated HTTP/2 response status.
+- **Terminal Diagnostic Aesthetic**: Displays window action pills (red/yellow/green), a mock command invocation (`curl -I https://scaffold.dev{pathname}`), simulated HTTP/2 response status, and a bold monospace `404_` indicator styled consistently with `Boot.jsx`.
+- **Fixed Navbar Clearance**: Structured with `padding: 110px 24px 60px` (`90px 16px 40px` on mobile screens) in `notfound.css` to guarantee the terminal header card sits cleanly beneath the fixed blurred top navbar (`header.fixed`) without overlap or clipping.
 - **Dynamic Path Detection**: Extracts the exact invalid path using React Router's `useLocation().pathname` and renders it in an styled code badge.
 - **Quick Recovery Navigation**: Offers two primary actions wrapped with React Router `<Link>`:
   - **"Go Home"** (`/`)
@@ -990,6 +992,7 @@ Features:
 
 1. **SPA Rewrites & Routing Fallback**: `firebase.json` specifies `"source": "**", "destination": "/index.html"`, so direct browser requests to invalid subpaths serve the Single Page Application bundle. In `src/App.jsx`, `<Route path="*" element={<NotFound />} />` is positioned as the final route inside `<Route element={<Layout />}>`.
 2. **Boot Navigator Protection**: When a cold request lands on `/xyz`, `BootNavigator` temporarily routes through `/boot` for kernel initialization. `Boot.jsx` verifies whether the stored target is an authenticated protected route (`/dashboard`, `/profile`, `/tracker`, `/portfolio`, `/resume`, `/assistant`). If not, it forwards the unauthenticated user directly to the target URL, allowing React Router's catch-all `*` route to render `<NotFound />` instead of inappropriately forcing `/login`.
+3. **Viewport Height & Navbar Spacing**: By inheriting from the universal `Layout`, the page main element (`<main id="mainContent">`) renders between `Navbar` and `Footer`. The container `.notfound-wrapper` uses `min-height: calc(100vh - 80px)` and explicit top padding to avoid getting tucked underneath the fixed navbar.
 
 #### c) Actual code
 
@@ -1037,10 +1040,10 @@ export default function NotFound() {
           </div>
 
           <div className="py-2">
-            <div className="font-display font-black text-6xl md:text-7xl tracking-tight" style={{ color: 'var(--fg)' }}>
+            <div className="font-mono font-black text-6xl md:text-7xl tracking-tight" style={{ color: 'var(--fg)' }}>
               404<span style={{ color: 'var(--accent)' }}>_</span>
             </div>
-            <p className="text-lg font-mono font-bold mt-2 text-emerald-500" style={{ color: 'var(--accent)' }}>
+            <p className="text-sm md:text-base font-mono font-bold mt-2" style={{ color: 'var(--accent)' }}>
               Target route not found in kernel registry.
             </p>
           </div>
@@ -1286,3 +1289,5 @@ For examiners inquiring about specific debugging stories and evolutionary decisi
 - **Settings Drawer Sync Status Honest Audit**: See `report.md` §6.16 (Bug Log)
 - **Ambient Floating AI Copilot Architecture (`AiBubble.jsx`)**: See `report.md` §8.2 (Feature Log)
 - **README & Proprietary Academic Licensing Overhaul**: See `report.md` §8.2 (Feature Log)
+- **Custom 404 Route Resolution Failure Page (`NotFound.jsx`)**: See `report.md` §8.7 (Feature Log)
+- **404 Terminal Card Navbar Clipping & Monospace Polish**: See `report.md` §6.18 (Bug Log)
