@@ -5,8 +5,10 @@ import Footer from './Footer.jsx';
 import CommandPalette from './CommandPalette.jsx';
 import AiBubble from './AiBubble.jsx';
 import { useGlobalShortcuts } from '../hooks/useGlobalShortcuts.js';
+import { useAuth } from '../hooks/useAuth.js';
 
 export default function Layout() {
+  const { currentUser } = useAuth();
   const location = useLocation();
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -105,8 +107,8 @@ export default function Layout() {
 
       <Footer />
 
-      {/* Ambient Floating AI Copilot */}
-      <AiBubble />
+      {/* Ambient Floating AI Copilot (only accessible when authenticated) */}
+      {currentUser && <AiBubble />}
 
       {/* Global Command Palette */}
       <CommandPalette

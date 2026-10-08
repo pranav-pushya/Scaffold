@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useProfile } from '../../hooks/useProfile.js';
@@ -78,18 +78,60 @@ export default function Portfolio() {
   const targetRole = profile?.targetRole || 'Software Engineer & Developer';
   const email = profile?.email || currentUser?.email || '';
 
-  // Technical skills
-  const coreLangs = profile?.coreLanguages
-    ? profile.coreLanguages.split(',').map((s) => s.trim()).filter(Boolean)
-    : [];
-  const frameworks = profile?.frameworks
-    ? profile.frameworks.split(',').map((s) => s.trim()).filter(Boolean)
-    : [];
-  const devTools = profile?.devTools
-    ? profile.devTools.split(',').map((s) => s.trim()).filter(Boolean)
-    : [];
+  // Dynamic Open Graph & Meta Tags for Shareable Public Link
+  useEffect(() => {
+    const originalTitle = document.title;
+    const metaTitle = `${fullName} — ${targetRole} | Portfolio`;
+    const metaDescription =
+      profile?.tagline ||
+      profile?.bio ||
+      `Professional developer portfolio and career record of ${fullName}, ${targetRole}.`;
+    const metaImage = profile?.photoUrl || '';
 
-  const projectList = Array.isArray(projects) ? projects : [];
+    document.title = metaTitle;
+
+    const setMetaTag = (attr, key, content) => {
+      if (!content) return;
+      let tag = document.head.querySelector(`meta[${attr}="${key}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute(attr, key);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    setMetaTag('property', 'og:title', metaTitle);
+    setMetaTag('property', 'og:description', metaDescription);
+    setMetaTag('property', 'og:type', 'website');
+    if (metaImage) {
+      setMetaTag('property', 'og:image', metaImage);
+    }
+
+    setMetaTag('name', 'twitter:card', 'summary_large_image');
+    setMetaTag('name', 'twitter:title', metaTitle);
+    setMetaTag('name', 'twitter:description', metaDescription);
+    if (metaImage) {
+      setMetaTag('name', 'twitter:image', metaImage);
+    }
+
+    return () => {
+      document.title = originalTitle;
+    };
+  }, [fullName, targetRole, profile?.tagline, profile?.bio, profile?.photoUrl]);
+
+  // Technical skills - memoized string splitting so re-renders (e.g. lightbox toggle, timer ticks) don't re-parse strings
+  const { coreLangs, frameworks, devTools } = useMemo(() => {
+    const parseList = (str) =>
+      str ? str.split(',').map((s) => s.trim()).filter(Boolean) : [];
+    return {
+      coreLangs: parseList(profile?.coreLanguages),
+      frameworks: parseList(profile?.frameworks),
+      devTools: parseList(profile?.devTools),
+    };
+  }, [profile?.coreLanguages, profile?.frameworks, profile?.devTools]);
+
+  const projectList = useMemo(() => (Array.isArray(projects) ? projects : []), [projects]);
 
   return (
     <div className="portfolio-wrapper">
@@ -120,7 +162,7 @@ export default function Portfolio() {
         {/* Hero Banner */}
         <div className="portfolio-hero-card">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div className="space-y-3 max-w-2xl">
+            <div className="space-y-3 max-w-xl">
               <div className="flex items-center gap-3 flex-wrap">
                 {profile?.jobStatus && (
                   <span
@@ -156,51 +198,63 @@ export default function Portfolio() {
               )}
             </div>
 
-            <div id="portPhotoBox">
-              {profile?.photoUrl ? (
-                <div
-                  id="portPhotoClickBox"
-                  className="w-32 h-32 rounded-2xl overflow-hidden border-2 border-emerald-500/40 shrink-0 shadow-lg cursor-pointer group relative transition-transform duration-200 hover:scale-105 hover:border-emerald-400"
-                  title="Click to view full photo"
-                  onClick={() => setPhotoModalOpen(true)}
-                >
-                  <img src={profile.photoUrl} alt={fullName} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-base">
-                    <i className="fas fa-search-plus"></i>
+            <div className="flex flex-col sm:flex-row items-center gap-4 shrink-0 w-full md:w-auto justify-between md:justify-end">
+              <Link
+                to="/resume"
+                className="btn-primary text-xs px-4 py-2.5 rounded-xl inline-flex items-center gap-2 font-mono font-bold shadow-md hover:scale-105 transition-all"
+                style={{ background: '#10b981', color: '#fff' }}
+                title="View and download printable ATS resume"
+              >
+                <i className="fas fa-file-download"></i> Download Resume
+              </Link>
+              <div id="portPhotoBox">
+                {profile?.photoUrl ? (
+                  <div
+                    id="portPhotoClickBox"
+                    className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 border-emerald-500/40 shrink-0 shadow-lg cursor-pointer group relative transition-transform duration-200 hover:scale-105 hover:border-emerald-400"
+                    title="Click to view full photo"
+                    onClick={() => setPhotoModalOpen(true)}
+                  >
+                    <img src={profile.photoUrl} alt={fullName} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-base">
+                      <i className="fas fa-search-plus"></i>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="w-28 h-28 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
-                  <i className="fas fa-user-code text-4xl text-emerald-500"></i>
-                </div>
-              )}
+                ) : (
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                    <i className="fas fa-user-code text-4xl text-emerald-500"></i>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Social & Contact Links */}
+          {/* Social & Contact Links - Prominent Clickable Buttons near top */}
           <div
             id="portSocialLinks"
-            className="flex items-center gap-4 flex-wrap pt-6 mt-6 border-t font-mono text-xs"
+            className="flex items-center gap-2.5 flex-wrap pt-5 mt-5 border-t font-mono text-xs"
             style={{ borderColor: 'var(--border)' }}
           >
             {email && (
-              <a href={`mailto:${email}`} className="hover-link flex items-center gap-1.5">
-                <i className="fas fa-envelope text-emerald-500"></i> {email}
+              <a
+                href={`mailto:${email}`}
+                className="btn-secondary text-xs px-3 py-2 rounded-lg flex items-center gap-2 transition-all hover:border-emerald-500 hover:text-emerald-400"
+                style={{ background: 'var(--bg)', borderColor: 'var(--border-strong)' }}
+              >
+                <i className="fas fa-envelope text-emerald-500"></i>
+                <span>{email}</span>
               </a>
-            )}
-            {profile?.phone && (
-              <span className="text-muted flex items-center gap-1.5">
-                <i className="fas fa-phone text-emerald-500"></i> {profile.phone}
-              </span>
             )}
             {profile?.githubUrl && (
               <a
                 href={profile.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover-link flex items-center gap-1.5"
+                className="btn-secondary text-xs px-3 py-2 rounded-lg flex items-center gap-2 transition-all hover:border-emerald-500 hover:text-emerald-400"
+                style={{ background: 'var(--bg)', borderColor: 'var(--border-strong)' }}
               >
-                <i className="fab fa-github"></i> GitHub ↗
+                <i className="fab fa-github"></i>
+                <span>GitHub ↗</span>
               </a>
             )}
             {profile?.linkedinUrl && (
@@ -208,9 +262,11 @@ export default function Portfolio() {
                 href={profile.linkedinUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover-link flex items-center gap-1.5"
+                className="btn-secondary text-xs px-3 py-2 rounded-lg flex items-center gap-2 transition-all hover:border-blue-500 hover:text-blue-400"
+                style={{ background: 'var(--bg)', borderColor: 'var(--border-strong)' }}
               >
-                <i className="fab fa-linkedin text-blue-500"></i> LinkedIn ↗
+                <i className="fab fa-linkedin text-blue-500"></i>
+                <span>LinkedIn ↗</span>
               </a>
             )}
             {profile?.websiteUrl && (
@@ -218,25 +274,196 @@ export default function Portfolio() {
                 href={profile.websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover-link flex items-center gap-1.5"
+                className="btn-secondary text-xs px-3 py-2 rounded-lg flex items-center gap-2 transition-all hover:border-cyan-500 hover:text-cyan-400"
+                style={{ background: 'var(--bg)', borderColor: 'var(--border-strong)' }}
               >
-                <i className="fas fa-globe text-cyan-500"></i> Website ↗
+                <i className="fas fa-globe text-cyan-500"></i>
+                <span>Website ↗</span>
+              </a>
+            )}
+            {profile?.phone && (
+              <a
+                href={`tel:${profile.phone}`}
+                className="btn-secondary text-xs px-3 py-2 rounded-lg flex items-center gap-2 transition-all hover:border-amber-500 hover:text-amber-400"
+                style={{ background: 'var(--bg)', borderColor: 'var(--border-strong)' }}
+              >
+                <i className="fas fa-phone text-amber-500"></i>
+                <span>{profile.phone}</span>
               </a>
             )}
           </div>
         </div>
 
-        {/* About & Executive Bio */}
-        {profile?.bio && (
-          <div id="portBioSection" className="portfolio-section-card">
-            <h3 className="font-display font-bold text-xl mb-4 flex items-center gap-2" style={{ color: 'var(--fg)' }}>
-              <i className="fas fa-user text-emerald-500"></i> About &amp; Bio
+        {/* Brief About & Professional Summary (Placed above Featured Projects) */}
+        <div id="portAboutSection" className="portfolio-section-card space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display font-bold text-xl flex items-center gap-2" style={{ color: 'var(--fg)' }}>
+              <i className="fas fa-user-check text-emerald-500"></i> About &amp; Professional Summary
             </h3>
-            <p id="portBioText" className="text-sm text-muted leading-relaxed whitespace-pre-line">
-              {profile.bio}
-            </p>
+            {profile?.expLevel && (
+              <span
+                className="tag text-[10px]"
+                style={{
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  color: '#059669',
+                  borderColor: 'rgba(16, 185, 129, 0.3)'
+                }}
+              >
+                {profile.expLevel}
+              </span>
+            )}
           </div>
-        )}
+
+          <div className="p-4 rounded-xl border space-y-2.5" style={{ background: 'rgba(var(--accent-rgb), 0.02)', borderColor: 'var(--border)' }}>
+            <div className="font-mono text-xs font-bold uppercase tracking-wider text-emerald-500">
+              {targetRole}
+            </div>
+            <p className="text-sm font-medium leading-relaxed" style={{ color: 'var(--fg-dim)' }}>
+              {profile?.tagline || `${fullName} is a dedicated ${targetRole} focused on building scalable, reliable software systems.`}
+            </p>
+            {profile?.bio && (
+              <p id="portBioText" className="text-xs text-muted leading-relaxed whitespace-pre-line border-t pt-2.5" style={{ borderColor: 'var(--border)' }}>
+                {profile.bio}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Featured Projects (Case-Study Format) */}
+        <div className="portfolio-section-card">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-display font-bold text-xl flex items-center gap-2" style={{ color: 'var(--fg)' }}>
+              <i className="fas fa-folder-open text-emerald-500"></i> Featured Projects (
+              <span id="portProjectCount">{projectList.length}</span>)
+            </h3>
+            <Link to="/tracker" className="btn-secondary text-xs px-3 py-1.5">
+              <i className="fas fa-tasks mr-1"></i> Manage in Tracker
+            </Link>
+          </div>
+
+          <div id="portProjectsGrid">
+            {isSyncing && projectList.length === 0 ? (
+              <div
+                className="text-center py-10 border border-dashed rounded-xl"
+                style={{ borderColor: 'var(--border)' }}
+              >
+                <i className="fas fa-circle-notch fa-spin text-2xl text-emerald-500 mb-3"></i>
+                <p className="text-xs text-muted">Syncing project portfolio...</p>
+              </div>
+            ) : projectList.length > 0 ? (
+              <div className="grid md:grid-cols-2 gap-6">
+                {projectList.map((p) => {
+                  const pTags = (p.techStack || p.tech || '')
+                    .split(',')
+                    .map((t) => t.trim())
+                    .filter(Boolean);
+
+                  const problemSolved = p.description || p.problem || 'Engineered to solve key developer workflow friction and automate data tracking.';
+
+                  return (
+                    <div key={p.id || p.title} className="portfolio-project-card space-y-3.5 flex flex-col justify-between">
+                      <div className="space-y-2.5">
+                        {/* Header: Title + Status Badge */}
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-display font-bold text-lg leading-snug" style={{ color: 'var(--fg)' }}>
+                            {p.title || p.name || 'Untitled Project'}
+                          </h4>
+                          <span
+                            className="tag text-[10px] shrink-0"
+                            style={{
+                              background:
+                                p.status === 'Done'
+                                  ? 'rgba(16, 185, 129, 0.1)'
+                                  : p.status === 'In Progress'
+                                  ? 'rgba(59, 130, 246, 0.1)'
+                                  : 'rgba(107, 114, 128, 0.1)',
+                              color:
+                                p.status === 'Done'
+                                  ? '#059669'
+                                  : p.status === 'In Progress'
+                                  ? '#2563eb'
+                                  : '#6b7280',
+                              borderColor:
+                                p.status === 'Done'
+                                  ? 'rgba(16, 185, 129, 0.3)'
+                                  : p.status === 'In Progress'
+                                  ? 'rgba(59, 130, 246, 0.3)'
+                                  : 'rgba(107, 114, 128, 0.3)'
+                            }}
+                          >
+                            {p.status || 'Active'}
+                          </span>
+                        </div>
+
+                        {/* Case Study: One-line What Problem It Solves */}
+                        <div className="p-2.5 rounded-lg border text-xs leading-relaxed" style={{ background: 'var(--bg)', borderColor: 'var(--border)' }}>
+                          <span className="font-mono text-[10px] font-bold text-emerald-500 uppercase tracking-wider block mb-1">
+                            <i className="fas fa-lightbulb text-[9px] mr-1"></i>Problem Solved
+                          </span>
+                          <p className="line-clamp-2 text-xs" style={{ color: 'var(--fg-dim)' }}>
+                            {problemSolved}
+                          </p>
+                        </div>
+
+                        {/* Tech Stack Tags */}
+                        {pTags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 pt-0.5">
+                            {pTags.map((t, idx) => (
+                              <span
+                                key={idx}
+                                className="tech-tag"
+                                style={{ fontSize: '0.7rem', padding: '2px 7px' }}
+                              >
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Links */}
+                      <div className="flex items-center gap-3 text-xs font-mono pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+                        {p.repoUrl ? (
+                          <a
+                            href={p.repoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover-link text-emerald-500 flex items-center gap-1"
+                          >
+                            <i className="fab fa-github text-xs"></i> Repo ↗
+                          </a>
+                        ) : (
+                          <span className="text-muted text-[11px]">Private Repo</span>
+                        )}
+                        {p.deployUrl && (
+                          <a
+                            href={p.deployUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover-link text-cyan-400 flex items-center gap-1"
+                          >
+                            <i className="fas fa-external-link-alt text-[10px]"></i> Live Demo ↗
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div
+                className="text-center py-10 border border-dashed rounded-xl"
+                style={{ borderColor: 'var(--border)' }}
+              >
+                <i className="fas fa-project-diagram text-3xl text-muted mb-3"></i>
+                <p className="text-sm text-muted mb-4">No projects logged in your Tracker yet.</p>
+                <Link to="/tracker" className="btn-primary text-xs px-4 py-2">
+                  Add Projects in Tracker
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Categorized Technical Competencies */}
         <div id="portSkillsSection" className="portfolio-section-card">
@@ -304,127 +531,6 @@ export default function Portfolio() {
               </>
             ) : (
               <div className="text-xs text-muted font-mono italic">No skills listed yet in Profile OS.</div>
-            )}
-          </div>
-        </div>
-
-        {/* Featured Projects (Synched from Tracker) */}
-        <div className="portfolio-section-card">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="font-display font-bold text-xl flex items-center gap-2" style={{ color: 'var(--fg)' }}>
-              <i className="fas fa-folder-open text-emerald-500"></i> Featured Projects (
-              <span id="portProjectCount">{projectList.length}</span>)
-            </h3>
-            <Link to="/tracker" className="btn-secondary text-xs px-3 py-1.5">
-              <i className="fas fa-tasks mr-1"></i> Manage in Tracker
-            </Link>
-          </div>
-
-          <div id="portProjectsGrid">
-            {isSyncing && projectList.length === 0 ? (
-              <div
-                className="text-center py-10 border border-dashed rounded-xl"
-                style={{ borderColor: 'var(--border)' }}
-              >
-                <i className="fas fa-circle-notch fa-spin text-2xl text-emerald-500 mb-3"></i>
-                <p className="text-xs text-muted">Syncing project portfolio...</p>
-              </div>
-            ) : projectList.length > 0 ? (
-              <div className="grid md:grid-cols-2 gap-6">
-                {projectList.map((p) => {
-                  const pTags = (p.techStack || p.tech || '')
-                    .split(',')
-                    .map((t) => t.trim())
-                    .filter(Boolean);
-
-                  return (
-                    <div key={p.id || p.title} className="portfolio-project-card space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-display font-bold text-lg" style={{ color: 'var(--fg)' }}>
-                          {p.title || p.name || 'Untitled Project'}
-                        </h4>
-                        <span
-                          className="tag text-[10px]"
-                          style={{
-                            background:
-                              p.status === 'Done'
-                                ? 'rgba(16, 185, 129, 0.1)'
-                                : p.status === 'In Progress'
-                                ? 'rgba(59, 130, 246, 0.1)'
-                                : 'rgba(107, 114, 128, 0.1)',
-                            color:
-                              p.status === 'Done'
-                                ? '#059669'
-                                : p.status === 'In Progress'
-                                ? '#2563eb'
-                                : '#6b7280',
-                            borderColor:
-                              p.status === 'Done'
-                                ? 'rgba(16, 185, 129, 0.3)'
-                                : p.status === 'In Progress'
-                                ? 'rgba(59, 130, 246, 0.3)'
-                                : 'rgba(107, 114, 128, 0.3)'
-                          }}
-                        >
-                          {p.status || 'Active'}
-                        </span>
-                      </div>
-
-                      {pTags.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {pTags.map((t, idx) => (
-                            <span
-                              key={idx}
-                              className="tech-tag"
-                              style={{ fontSize: '0.7rem', padding: '2px 7px' }}
-                            >
-                              {t}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      {p.description && (
-                        <p className="text-xs text-muted leading-relaxed">{p.description}</p>
-                      )}
-
-                      <div className="flex items-center gap-3 text-xs font-mono pt-2">
-                        {p.repoUrl && (
-                          <a
-                            href={p.repoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover-link text-emerald-500"
-                          >
-                            Repo ↗
-                          </a>
-                        )}
-                        {p.deployUrl && (
-                          <a
-                            href={p.deployUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover-link text-emerald-500"
-                          >
-                            Live Demo ↗
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div
-                className="text-center py-10 border border-dashed rounded-xl"
-                style={{ borderColor: 'var(--border)' }}
-              >
-                <i className="fas fa-project-diagram text-3xl text-muted mb-3"></i>
-                <p className="text-sm text-muted mb-4">No projects logged in your Tracker yet.</p>
-                <Link to="/tracker" className="btn-primary text-xs px-4 py-2">
-                  Add Projects in Tracker
-                </Link>
-              </div>
             )}
           </div>
         </div>

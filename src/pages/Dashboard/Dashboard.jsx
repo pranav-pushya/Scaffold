@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useProfile } from '../../hooks/useProfile.js';
@@ -65,45 +65,65 @@ export default function Dashboard() {
   const userRole = profile?.targetRole || 'Software Engineer & Developer';
   const expLevel = profile?.expLevel || 'Developer';
 
-  // Profile readiness calculation (14 key fields)
-  const profileFields = [
-    profile?.fullName, profile?.email, profile?.phone, profile?.location,
-    profile?.targetRole, profile?.bio, profile?.coreLanguages, profile?.frameworks,
-    profile?.devTools, profile?.degree, profile?.institution, profile?.githubUrl,
-    profile?.linkedinUrl, profile?.experience
-  ];
-  const filledCount = profileFields.filter(Boolean).length;
-  const readinessPercent = Math.round((filledCount / profileFields.length) * 100);
+  // Profile readiness calculation (14 key fields) - memoized to prevent recomputing across unrelated re-renders
+  const { readinessPercent, atsHint } = useMemo(() => {
+    const profileFields = [
+      profile?.fullName, profile?.email, profile?.phone, profile?.location,
+      profile?.targetRole, profile?.bio, profile?.coreLanguages, profile?.frameworks,
+      profile?.devTools, profile?.degree, profile?.institution, profile?.githubUrl,
+      profile?.linkedinUrl, profile?.experience
+    ];
+    const filledCount = profileFields.filter(Boolean).length;
+    const percent = Math.round((filledCount / profileFields.length) * 100);
+    const hint = percent < 100
+      ? 'Add your professional email, bio, and city/country location for employer ATS indexing.'
+      : 'Your profile is fully optimized for employer ATS indexing!';
+    return { readinessPercent: percent, atsHint: hint };
+  }, [profile]);
 
-  // ATS Score calculation
-  const projectList = Array.isArray(projects) ? projects : [];
-  let atsScore = Math.round((readinessPercent * 0.75) + (projectList.length >= 1 ? 15 : 0) + (projectList.length >= 3 ? 10 : 0));
-  if (atsScore > 100) atsScore = 100;
+  // Project Metrics & ATS Score calculation memoized based on projects and readinessPercent
+  const {
+    projectList,
+    totalProjects,
+    inProgressProjects,
+    completedProjects,
+    atsScore,
+    gradeText,
+    gradeColor
+  } = useMemo(() => {
+    const list = Array.isArray(projects) ? projects : [];
+    let score = Math.round((readinessPercent * 0.75) + (list.length >= 1 ? 15 : 0) + (list.length >= 3 ? 10 : 0));
+    if (score > 100) score = 100;
 
-  let gradeText = 'Grade D • Needs Work';
-  let gradeColor = '#ef4444';
-  if (atsScore >= 80) {
-    gradeText = 'Grade A • Excellent';
-    gradeColor = '#10b981';
-  } else if (atsScore >= 60) {
-    gradeText = 'Grade B • Good';
-    gradeColor = '#3b82f6';
-  } else if (atsScore >= 40) {
-    gradeText = 'Grade C • Fair';
-    gradeColor = '#f59e0b';
-  }
+    let text = 'Grade D • Needs Work';
+    let color = '#ef4444';
+    if (score >= 80) {
+      text = 'Grade A • Excellent';
+      color = '#10b981';
+    } else if (score >= 60) {
+      text = 'Grade B • Good';
+      color = '#3b82f6';
+    } else if (score >= 40) {
+      text = 'Grade C • Fair';
+      color = '#f59e0b';
+    }
 
-  const atsHint = readinessPercent < 100
-    ? 'Add your professional email, bio, and city/country location for employer ATS indexing.'
-    : 'Your profile is fully optimized for employer ATS indexing!';
+    const inProgress = list.filter((p) => (p.status || '').toLowerCase().includes('progress'));
+    const completed = list.filter((p) => {
+      const s = (p.status || '').toLowerCase();
+      return s.includes('done') || s.includes('complete');
+    }).length;
 
-  // Project Metrics
-  const totalProjects = projectList.length;
-  const inProgressProjects = projectList.filter((p) => (p.status || '').toLowerCase().includes('progress'));
-  const completedProjects = projectList.filter((p) => {
-    const s = (p.status || '').toLowerCase();
-    return s.includes('done') || s.includes('complete');
-  }).length;
+    return {
+      projectList: list,
+      totalProjects: list.length,
+      inProgressProjects: inProgress,
+      completedProjects: completed,
+      atsScore: score,
+      gradeText: text,
+      gradeColor: color
+    };
+  }, [projects, readinessPercent]);
 
   return (
     <div className="dashboard-wrapper max-w-7xl mx-auto space-y-6">

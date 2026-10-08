@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth.js';
+import { generateCaptcha } from '../../utils/captchaUtils.js';
 import './login.css';
-
-function generateCaptcha() {
-  const num1 = Math.floor(Math.random() * 9) + 1;
-  const num2 = Math.floor(Math.random() * 9) + 1;
-  return { num1, num2, expected: num1 + num2 };
-}
 
 export default function Login() {
   const [mode, setMode] = useState('login'); // 'login' or 'signup'

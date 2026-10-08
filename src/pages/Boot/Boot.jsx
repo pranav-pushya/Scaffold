@@ -59,9 +59,10 @@ export default function Boot() {
       }
 
       if (!currentUser) {
-        // If not logged in and target is a protected route, go to /login
-        const isPublic = target === '/' || target === '/login';
-        navigate(isPublic ? target : '/login', { replace: true });
+        // Known protected routes redirect unauthenticated users to /login
+        const protectedRoutes = ['/dashboard', '/profile', '/tracker', '/portfolio', '/resume', '/assistant'];
+        const isProtected = protectedRoutes.some((route) => target === route || target.startsWith(`${route}?`) || target.startsWith(`${route}/`));
+        navigate(isProtected ? '/login' : target, { replace: true });
       } else {
         navigate(target, { replace: true });
       }

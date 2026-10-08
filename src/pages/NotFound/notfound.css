@@ -1,0 +1,56 @@
+.notfound-wrapper {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 110px 24px 60px;
+}
+
+.notfound-terminal {
+  max-width: 680px;
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.notfound-terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--bg-elev);
+  border-bottom: 1px solid var(--border);
+}
+
+.notfound-terminal-body {
+  padding: 32px 28px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.notfound-prompt {
+  color: var(--accent);
+  margin-right: 8px;
+}
+
+.notfound-path-badge {
+  display: inline-block;
+  background: var(--code-bg);
+  color: var(--accent-2);
+  border: 1px solid var(--border-strong);
+  padding: 3px 8px;
+  border-radius: 6px;
+  word-break: break-all;
+}
+
+@media (max-width: 640px) {
+  .notfound-wrapper {
+    padding: 90px 16px 40px;
+  }
+
+  .notfound-terminal-body {
+    padding: 24px 18px;
+  }
+}

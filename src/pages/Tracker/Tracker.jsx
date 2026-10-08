@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useTracker } from '../../hooks/useTracker.js';
 import { saveProject, updateProject as updateFirestoreProject, deleteProject as deleteFirestoreProject } from '../../firebase/firestoreService.js';
@@ -70,7 +70,11 @@ export default function Tracker() {
     }
   };
 
-  const handleEditClick = (card) => {
+  // useCallback: these handlers are called inside renderCard closures. Without memoization,
+  // every re-render (e.g. typing in the search box, toggling showForm) creates new function
+  // objects, which would invalidate all card closures and force a full re-render of every
+  // visible card even when the project data hasn't changed.
+  const handleEditClick = useCallback((card) => {
     setEditId(card.id);
     setIsEditing(true);
     setCardForm({
@@ -83,9 +87,9 @@ export default function Tracker() {
     });
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, []); // only calls React state setters, which are guaranteed stable references
 
-  const handleDeleteClick = async (cardId) => {
+  const handleDeleteClick = useCallback(async (cardId) => {
     if (window.confirm('Are you sure you want to delete this card?')) {
       try {
         await deleteProject(userId, cardId);
@@ -96,9 +100,9 @@ export default function Tracker() {
         console.error('Failed to delete card:', err);
       }
     }
-  };
+  }, [userId, deleteProject]); // re-creates only when auth changes (login/logout)
 
-  const handleStatusChange = async (card, newStatus) => {
+  const handleStatusChange = useCallback(async (card, newStatus) => {
     try {
       const updated = { ...card, status: newStatus };
       await updateProject(userId, updated);
@@ -108,7 +112,7 @@ export default function Tracker() {
     } catch (err) {
       console.error('Failed to update status:', err);
     }
-  };
+  }, [userId, updateProject]); // same reasoning as handleDeleteClick
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -140,18 +144,27 @@ export default function Tracker() {
     }
   };
 
-  const projectList = Array.isArray(projects) ? projects : [];
-  const filteredList = projectList.filter((p) => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    const title = (p.title || p.name || '').toLowerCase();
-    const tech = (p.techStack || p.tech || '').toLowerCase();
-    const desc = (p.description || '').toLowerCase();
-    return title.includes(q) || tech.includes(q) || desc.includes(q);
-  });
-  const todoCards = filteredList.filter((p) => normalizeStatus(p.status) === 'To-Do');
-  const inProgressCards = filteredList.filter((p) => normalizeStatus(p.status) === 'In Progress');
-  const doneCards = filteredList.filter((p) => normalizeStatus(p.status) === 'Done');
+  // useMemo: the search input fires on every keystroke, causing a re-render on each character.
+  // Without memoization that re-runs 4 .filter() passes across the entire project array each time.
+  // With useMemo([projects, searchQuery]), the filtering work is skipped when neither the project
+  // data nor the search term has changed (e.g. when showForm or isSubmitting toggles).
+  const { filteredList, todoCards, inProgressCards, doneCards } = useMemo(() => {
+    const list = Array.isArray(projects) ? projects : [];
+    const filtered = list.filter((p) => {
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase();
+      const title = (p.title || p.name || '').toLowerCase();
+      const tech = (p.techStack || p.tech || '').toLowerCase();
+      const desc = (p.description || '').toLowerCase();
+      return title.includes(q) || tech.includes(q) || desc.includes(q);
+    });
+    return {
+      filteredList: filtered,
+      todoCards: filtered.filter((p) => normalizeStatus(p.status) === 'To-Do'),
+      inProgressCards: filtered.filter((p) => normalizeStatus(p.status) === 'In Progress'),
+      doneCards: filtered.filter((p) => normalizeStatus(p.status) === 'Done'),
+    };
+  }, [projects, searchQuery]);
 
   const renderCard = (card) => {
     const tags = (card.techStack || card.tech || '')
@@ -439,7 +452,7 @@ export default function Tracker() {
               </span>
             </div>
             <div id="columnTodo" className="space-y-4 flex-1">
-              {loading && !projectList.length ? (
+              {loading && !filteredList.length ? (
                 <div
                   className="text-xs text-muted font-mono italic p-4 text-center border border-dashed rounded-lg"
                   style={{ borderColor: 'var(--border)' }}
@@ -472,7 +485,7 @@ export default function Tracker() {
               </span>
             </div>
             <div id="columnInProgress" className="space-y-4 flex-1">
-              {loading && !projectList.length ? (
+              {loading && !filteredList.length ? (
                 <div
                   className="text-xs text-muted font-mono italic p-4 text-center border border-dashed rounded-lg"
                   style={{ borderColor: 'var(--border)' }}
@@ -507,7 +520,7 @@ export default function Tracker() {
               </span>
             </div>
             <div id="columnDone" className="space-y-4 flex-1">
-              {loading && !projectList.length ? (
+              {loading && !filteredList.length ? (
                 <div
                   className="text-xs text-muted font-mono italic p-4 text-center border border-dashed rounded-lg"
                   style={{ borderColor: 'var(--border)' }}

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
@@ -9,13 +9,23 @@ import Layout from './components/Layout.jsx';
 
 import Home from './pages/Home/Home.jsx';
 import Login from './pages/Login/Login.jsx';
-import Dashboard from './pages/Dashboard/Dashboard.jsx';
-import Profile from './pages/Profile/Profile.jsx';
-import Tracker from './pages/Tracker/Tracker.jsx';
-import Portfolio from './pages/Portfolio/Portfolio.jsx';
-import Resume from './pages/Resume/Resume.jsx';
-import Assistant from './pages/Assistant/Assistant.jsx';
 import Boot from './pages/Boot/Boot.jsx';
+import NotFound from './pages/NotFound/NotFound.jsx';
+
+// Code-split heavy protected pages to optimize initial bundle size
+const Dashboard = lazy(() => import('./pages/Dashboard/Dashboard.jsx'));
+const Profile = lazy(() => import('./pages/Profile/Profile.jsx'));
+const Tracker = lazy(() => import('./pages/Tracker/Tracker.jsx'));
+const Portfolio = lazy(() => import('./pages/Portfolio/Portfolio.jsx'));
+const Resume = lazy(() => import('./pages/Resume/Resume.jsx'));
+const Assistant = lazy(() => import('./pages/Assistant/Assistant.jsx'));
+
+// Lightweight fallback for lazy-loaded route boundaries
+const RouteFallback = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', fontFamily: 'monospace', color: 'var(--muted)' }}>
+    <span>Loading module...</span>
+  </div>
+);
 
 function BootNavigator() {
   const navigate = useNavigate();
@@ -50,12 +60,14 @@ export default function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Login />} />
 
-                  {/* Protected Pages */}
+                  {/* Protected Pages (Lazy loaded inside Suspense boundary) */}
                   <Route
                     path="/dashboard"
                     element={
                       <ProtectedRoute>
-                        <Dashboard />
+                        <Suspense fallback={<RouteFallback />}>
+                          <Dashboard />
+                        </Suspense>
                       </ProtectedRoute>
                     }
                   />
@@ -63,7 +75,9 @@ export default function App() {
                     path="/profile"
                     element={
                       <ProtectedRoute>
-                        <Profile />
+                        <Suspense fallback={<RouteFallback />}>
+                          <Profile />
+                        </Suspense>
                       </ProtectedRoute>
                     }
                   />
@@ -71,7 +85,9 @@ export default function App() {
                     path="/tracker"
                     element={
                       <ProtectedRoute>
-                        <Tracker />
+                        <Suspense fallback={<RouteFallback />}>
+                          <Tracker />
+                        </Suspense>
                       </ProtectedRoute>
                     }
                   />
@@ -79,7 +95,9 @@ export default function App() {
                     path="/portfolio"
                     element={
                       <ProtectedRoute>
-                        <Portfolio />
+                        <Suspense fallback={<RouteFallback />}>
+                          <Portfolio />
+                        </Suspense>
                       </ProtectedRoute>
                     }
                   />
@@ -87,7 +105,9 @@ export default function App() {
                     path="/resume"
                     element={
                       <ProtectedRoute>
-                        <Resume />
+                        <Suspense fallback={<RouteFallback />}>
+                          <Resume />
+                        </Suspense>
                       </ProtectedRoute>
                     }
                   />
@@ -95,14 +115,16 @@ export default function App() {
                     path="/assistant"
                     element={
                       <ProtectedRoute>
-                        <Assistant />
+                        <Suspense fallback={<RouteFallback />}>
+                          <Assistant />
+                        </Suspense>
                       </ProtectedRoute>
                     }
                   />
-                </Route>
 
-                {/* Catch-all fallback */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                  {/* Public Catch-all 404 Route (inside shared Layout, not protected) */}
+                  <Route path="*" element={<NotFound />} />
+                </Route>
               </Routes>
             </BrowserRouter>
           </TrackerProvider>

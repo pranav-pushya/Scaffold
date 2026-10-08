@@ -481,6 +481,11 @@ LOGGED-IN USER CONTEXT:
     handleSend();
   };
 
+  // Do not render floating AI copilot if user is logged out
+  if (!currentUser) {
+    return null;
+  }
+
   return (
     <>
       {/* Expanded Floating Chat Panel */}

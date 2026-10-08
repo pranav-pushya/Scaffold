@@ -40,7 +40,7 @@ Every module reads from and writes to the same underlying data (a Firestore-back
 | Member | Owns | Key Files (React version) |
 |---|---|---|
 | **Tiksha** (Lead) | UI/UX, design tokens, theming, boot/login/home visuals, responsive layout | `styles/`, `Navbar.jsx`, `Footer.jsx`, `Home.jsx`, `*.css` |
-| **Tammana** | Routing, forms, page logic | `App.jsx` routes, `Login.jsx`, `Profile.jsx`, `Dashboard.jsx`, `Tracker.jsx`, `Portfolio.jsx`, `Resume.jsx` (logic portions) |
+| **Tammana** | Routing, forms, page logic | `App.jsx` routes, `NotFound.jsx`, `Login.jsx`, `Profile.jsx`, `Dashboard.jsx`, `Tracker.jsx`, `Portfolio.jsx`, `Resume.jsx` (logic portions) |
 | **Pranav Pushya** | Firebase (Auth/Firestore), state management, AI integration, deployment | `firebase/`, `context/` (Auth, Profile, Tracker, Theme), `Assistant.jsx`, deployment pipeline |
 
 ---
@@ -164,6 +164,19 @@ This is the most viva-relevant section — it demonstrates genuine debugging, no
 - **What happened**: The newly built Workspace Settings drawer displayed "Status: Realtime Active" under Cloud Auto-Sync, implying live WebSocket synchronization with Firestore. An audit revealed zero `onSnapshot()` listeners exist in the project — all Firestore reads are one-time `getDoc`/`getDocs` calls.
 - **Fix**: Replaced the label with honest status reporting (`Status: Synced` when authenticated, `Status: Syncing...` during transfer, `Status: Local Only` in guest sessions, accompanied by exact timestamp `Last sync: [time]`). Connected the "Sync Now" button to actually trigger `getProfile(uid)` and `getProjects(uid)` to refresh local client caches on demand.
 
+### 6.17 Floating AI Copilot (`AiBubble`) accessible during unauthenticated sessions
+- **Symptom**: The floating ambient AI copilot widget (`AiBubble.jsx`) rendered indiscriminately on every page via `Layout.jsx`, allowing unauthenticated/logged-out visitors to access the AI chat drawer. In logged-out state, queries referencing user profile metrics, projects, or ATS readiness yielded empty/generic fallback states and allowed unauthorized Groq Cloud API invocations.
+- **Fix**: Implemented strict authentication guarding across two layers:
+  1. In `src/components/Layout.jsx`: Subscribed to `useAuth()` and conditionally mounted `<AiBubble />` only when `currentUser` is non-null (`{currentUser && <AiBubble />}`).
+  2. In `src/components/AiBubble.jsx`: Added an internal defensive guard (`if (!currentUser) return null;`) ensuring the component safely unmounts and renders zero DOM elements if an authentication session terminates or is absent.
+
+### 6.18 404 Page terminal card clipped under fixed navbar & typography clash
+- **Symptom**: On navigating to an invalid route (e.g. `/asdfff`), the top portion of the 404 terminal card (window control dots, `error_code_404.sh` header, and curl command invocation) was clipped and obscured beneath the fixed top navbar (`header.fixed`). In addition, the big numeric "404" header was styled with `font-display` (`Fraunces` serif), clashing with the developer terminal monospace aesthetic.
+- **Root Cause**: The fixed navbar occupies approximately 60–75px of vertical space (`top-0 fixed`). `.notfound-wrapper` only specified `padding: 40px 20px`, which was insufficient to clear the navbar header (unlike other pages such as `dashboard.css` and `tracker.css` which specify `padding: 100px 24px 60px`).
+- **Fix**:
+  1. Updated `notfound.css` to use `padding: 110px 24px 60px` (and responsive `90px 16px 40px` on mobile), ensuring the complete terminal card renders comfortably below the navbar.
+  2. Changed the numeric `404_` header font to `font-mono font-black` in `NotFound.jsx`, maintaining full visual consistency with the terminal styling of `Boot.jsx`.
+
 ---
 
 ## 7. Deployment History
@@ -196,7 +209,7 @@ This is the most viva-relevant section — it demonstrates genuine debugging, no
 - **Workspace Settings drawer**: JSON export/import of full workspace state, "Purge Local Cache," Reduce Motion toggle, Compact Density toggle, Default Landing Route selector, Portfolio Visibility (Public/Private) with shareable link, Cloud Data Sync status indicator with genuine on-demand Firestore re-fetch, keyboard shortcuts reference, System Information panel.
 - **Command Palette** (`Ctrl+K` or `/`): fuzzy navigation to any page, shown with keyboard shortcut hints (Alt+1 through Alt+7 for page navigation, Alt+N/E/A/F/L for actions, `T` for theme cycling).
 - **Verified Cloud Sync label audit (no `onSnapshot` used)**: Audited the entire codebase for Firestore's `onSnapshot()` real-time listener — confirmed zero occurrences. All database operations are point-in-time SDK queries (`getDoc`/`getDocs`/`setDoc`/`updateDoc`). The Settings drawer was updated to reflect this honestly: section retitled "Cloud Data Sync", label changed from misleading "Status: Realtime Active" to "Status: Synced" / "Status: Local Only" alongside "Last sync: [timestamp]", and "Sync Now" button wired to perform an authentic cloud re-fetch.
-- **Ambient Floating AI Chat Widget (`AiBubble.jsx`)**: A lightweight, fixed-position circular copilot pinned at the bottom-right of every page across the shared `Layout.jsx`.
+- **Ambient Floating AI Chat Widget (`AiBubble.jsx`)**: A lightweight, fixed-position circular copilot pinned at the bottom-right of every page across the shared `Layout.jsx` (accessible exclusively to authenticated users; completely unmounted and hidden in logged-out sessions).
   - **Core Design Rationale (Viva Reference)**: *"Humare paas do AI touchpoints hain jaan-bujh ke — poora Assistant page deep-work sessions ke liye hai (resume audit, project ideas, system design prep), jabki floating widget ambient, quick-help ke liye hai jo kisi bhi page se turant access ho sakta hai bina context switch kiye — jaise real products mein help-widget aur dedicated-tool alag hote hain (Intercom vs. ek poori analytics dashboard)."*
   - **Data Access & Scope**: Reads live data from `ProfileContext` (name, target role, technical skills, profile readiness, estimated ATS score) and `TrackerContext` (total project count, completed/done count, in-progress tasks), paired with a static local knowledge engine for instantaneous navigation and feature answers (shortcuts guide, making portfolio public, resume export, workspace data backup).
   - **Shared API Integration**: Reuses the exact same Groq Cloud API configuration as `Assistant.jsx` via a unified `src/services/aiService.js` (same endpoint, same `openai/gpt-oss-20b` model, same `VITE_GROQ_API_KEY`).
@@ -204,6 +217,8 @@ This is the most viva-relevant section — it demonstrates genuine debugging, no
 - **README & Proprietary Academic Licensing Overhaul**:
   - Overhauled `README.md` into a comprehensive, professional developer OS specification detailing the closed-loop architecture, dual-tier AI touchpoints, Command Palette, Settings Drawer, master keyboard shortcuts table, ATS scoring algorithm, and viva defense Q&A.
   - Formally designated the repository as **NOT Open Source** (Proprietary Academic Submission for Chitkara University Course 25CSE0203 by Group 3G5). Updated `package.json` with `"license": "UNLICENSED"` and `"private": true`, preventing accidental open-source package publication or indexing under permissive licenses.
+- **Comprehensive Project Documentation & Technical Reference Manual (`PROJECT_DOCUMENTATION.md`)**:
+  - Authored an exhaustive 1100+ line technical manual covering conceptual architecture (closed-loop data model), complete tech stack, module-by-module deep dive with verbatim production code snippets, cross-component data flow matrix, and explicit Firebase Auth & Firestore security rules analysis. Serves as the primary reference manual and viva defense study guide.
 
 ### 8.3 Bug-fix batch (post-migration polish)
 - Password show/hide eye icon on Login
@@ -213,9 +228,61 @@ This is the most viva-relevant section — it demonstrates genuine debugging, no
 - Fixed missing card styling on the "Firebase Auth System" feature card (was inconsistent with its sibling cards)
 - Fixed Tracker status dropdown to correctly show the project's current status as selected, not default to the first option
 
+### 8.4 Public Portfolio Credibility & Recruiter Optimization
+- **Dynamic Open Graph & Twitter Meta Tags**: Added client-side head management via `useEffect` on `/portfolio` (`og:title`, `og:description`, `og:image`, `og:type`, `twitter:card`, `twitter:title`, `twitter:description`, `twitter:image`). When sharing public portfolio links on LinkedIn, Slack, Email, or WhatsApp, rich preview cards are rendered displaying developer name, target role, tagline, and profile picture instead of plain text links. Restores original document title on unmount.
+- **Concise Project Case-Study Format**: Upgraded Featured Projects cards from static tech tag badges to a structured case-study format featuring a highlighted "Problem Solved" breakdown, status tags, tech stack badges, and direct repository/live demo links (kept to 2–3 lines per card to maintain visual scannability).
+- **Top-Level "Download Resume" CTA**: Added a prominent top-level "Download Resume" button in the hero card linking directly to the ATS resume generator flow (`/resume`).
+- **Framed "About & Professional Summary" Section**: Added a dedicated professional summary section positioned above Featured Projects framing tagline, target role, and career bio cleanly into a recruiter-ready executive summary.
+- **Top-Level Clickable Contact Buttons**: Converted contact details (Email, GitHub, LinkedIn, Website, Phone) into styled, top-level clickable button pills near the hero banner for immediate recruiter contact.
+
+### 8.5 Testing Infrastructure (CLO06 — Vitest + React Testing Library)
+
+- **Why Vitest over Jest**: The project uses Vite 5 + `@vitejs/plugin-react`. Vitest reuses the exact same `vite.config.js` pipeline, natively understands JSX and ES modules with zero additional Babel/transform config, and doesn't need `moduleNameMapper` shims for CSS/asset imports. Jest with Vite requires a non-trivial bridge setup (`jest-environment-jsdom`, custom Babel preset, ESM transform). Vitest is the correct native choice and is explicitly documented in the Vitest FAQ as the preferred test runner for Vite projects.
+- **Packages added** (devDependencies): `vitest@^2.1.9`, `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`, `jsdom`. Note: Vitest 5.x requires Vite ≥6 — installed Vitest 2.x (LTS series) which is fully compatible with the project's Vite 5.4.21.
+- **Config**: `test` block added to `vite.config.js` (`environment: 'jsdom'`, `setupFiles: ['./src/test/setup.js']`, `globals: true`). `src/test/setup.js` imports `@testing-library/jest-dom` to extend `expect` with DOM matchers.
+- **Scripts**: `"test": "vitest run"` (single-pass, CI-safe), `"test:watch": "vitest"` (interactive TDD mode).
+- **Captcha utility extraction**: `generateCaptcha()` was previously a private function inside `Login.jsx` (not importable for testing). Extracted to `src/utils/captchaUtils.js` (also exporting `validateCaptcha()`). `Login.jsx` updated to import from the utility — zero behavior change, now testable.
+
+**Test files written (all 24 tests passing as of 2026-10-07):**
+
+| File | Type | Tests |
+|---|---|---|
+| `src/test/captchaUtils.test.js` | Unit — pure functions | 9 tests — operand range [1,9], expected = num1+num2, answer in [2,18], validate() true/false branches |
+| `src/test/Footer.test.jsx` | Component — RTL render | 8 tests — no-crash render, copyright line, team names, roles, platform module pills, section label, GitHub/LinkedIn link counts, `<footer>` semantic element |
+| `src/test/ProtectedRoute.test.jsx` | Integration — mocked AuthContext | 7 tests — spinner during loading, no children during loading, redirects to /login when unauthenticated, no children after redirect, renders children when authenticated, no login page shown when authenticated, custom children rendered correctly |
+
+**Verified**: `npm test` exits 0, `3 test files, 24 tests, 0 failures`.
+### 8.6 Basic Performance Optimizations (PBE-II Scope — `useMemo`, `useCallback`, `React.lazy`)
+
+Applied targeted, justifiable React performance optimizations to eliminate wasted re-renders, expensive multi-pass array re-filtering, and reduce initial bundle size:
+
+1. **Tracker Page (`Tracker.jsx`)**:
+   - **`useMemo` on Filtered & Status Lists**: Memoized `filteredList`, `todoCards`, `inProgressCards`, and `doneCards` with dependencies `[projects, searchQuery]`. Previously, typing into the search input fired a state update on every keystroke, forcing 4 full `.filter()` passes over all project objects even if the list contents had not changed. Also prevents recalculation when toggling form modal visibility (`showForm`) or form submission state (`isSubmitting`).
+   - **`useCallback` on Card Handlers**: Memoized `handleEditClick`, `handleDeleteClick`, and `handleStatusChange`. These functions are passed down into card render closures. Without `useCallback`, new function references were generated on every parent render cycle, invalidating card closures unnecessarily.
+2. **Dashboard Page (`Dashboard.jsx`)**:
+   - **`useMemo` on Profile Readiness**: Derived `readinessPercent` and `atsHint` across 14 profile fields memoized on `[profile]`.
+   - **`useMemo` on ATS Scoring Heuristics & Metrics**: Derived `atsScore`, `gradeText`, `gradeColor`, `totalProjects`, `inProgressProjects`, and `completedProjects` memoized on `[projects, readinessPercent]`. Avoids recalculating math scoring formulas and array traversals on non-data state updates (such as `isLoading` timeout notices or `showIdeasModal` toggles).
+3. **Portfolio Page (`Portfolio.jsx`)**:
+   - **`useMemo` on Skill Parsing**: Memoized string splitting (`.split(',').map().filter()`) for `coreLangs`, `frameworks`, and `devTools` based on `[profile?.coreLanguages, profile?.frameworks, profile?.devTools]`. Eliminates redundant string tokenization when toggling the photo lightbox modal (`photoModalOpen`) or during async timer ticks.
+4. **App Root Code-Splitting (`App.jsx`)**:
+   - **Route-Level `React.lazy()` + `<Suspense>`**: Wrapped heavy protected modules (`Dashboard`, `Profile`, `Tracker`, `Portfolio`, `Resume`, `Assistant`) in dynamic `lazy(() => import(...))` boundaries paired with a lightweight fallback spinner. Unauthenticated visitors landing on `/`, `/login`, or `/boot` no longer fetch or parse the full application suite upfront, keeping initial asset weight minimal.
+
+### 8.7 Custom 404 Route Resolution Failure Page (`NotFound.jsx` & `notfound.css`)
+
+- **Custom Terminal-Themed 404 View**: Added a custom 404 page styled with Scaffold's developer-terminal aesthetic (simulated `curl -I https://scaffold.dev{pathname}` error response, window action pills, HTTP/2 404 error header, and big `404_` monospace display).
+- **Theme Token Adherence**: Uses semantic tokens defined in `themes.css` (`var(--card)`, `var(--border-strong)`, `var(--accent)`, `var(--code-bg)`, `var(--fg)`) rather than hardcoded hex codes, seamlessly adapting across Dark, Light, and Cyber terminal themes.
+- **Dynamic Path Display**: Reads the exact invalid path using `useLocation().pathname` and highlights it in a monospace `.notfound-path-badge`.
+- **Navigation & Recovery**: Features explicit `<Link>` buttons for **"Go Home"** (`/`) and **"Go to Dashboard"** (`/dashboard`).
+- **Document Title Lifecycle**: Sets `document.title = '404 — Page Not Found | Scaffold'` on mount and restores previous title upon unmount.
+- **Catch-All Route Setup in `App.jsx`**: Mounted `<Route path="*" element={<NotFound />} />` as the final route inside `<Route element={<Layout />}>`. Placed inside `Layout` so that `Navbar`, `Footer`, and `AiBubble` remain accessible, but deliberately **not** wrapped in `ProtectedRoute`. Unauthenticated visitors hitting `/xyz` see the diagnostic 404 page rather than an unexpected login redirect.
+- **Boot Navigator Bypass Fix (`Boot.jsx`)**: Updated Boot redirect logic. Previously, cold hits to `/xyz` were redirected to `/login` if `currentUser` was null because only `'/'` and `'/login'` were treated as public routes. Updated `Boot.jsx` to explicitly verify against known protected routes (`['/dashboard', '/profile', '/tracker', '/portfolio', '/resume', '/assistant']`). Any unknown route is preserved and forwarded directly to React Router, allowing the 404 handler to trigger properly.
+- **Automated Vitest/RTL Test Suite (`NotFound.test.jsx`)**: Added 4 automated unit and integration tests verifying rendering, route message output, path badge accuracy, navigation links, and document title lifecycle. Total passing test suite expanded to 28 tests across 4 test files.
+
 ---
 
-## 9. React Migration Log
+
+
+
 
 Migration is staged and phase-gated — each phase is built, tested, and confirmed working before the next begins, on a dedicated `react-migration` branch (kept separate from `main` until stable).
 
@@ -245,9 +312,11 @@ Migration is staged and phase-gated — each phase is built, tested, and confirm
 - [x] Verify the Settings drawer's "Realtime Active" label is accurate; corrected to "Status: Synced" / "Last sync" after confirming no `onSnapshot` in codebase.
 - [ ] Full regression test of the new Settings drawer + Command Palette (Export/Import JSON, Purge Cache, all keyboard shortcuts) to confirm each is genuinely functional, not just visual.
 - [ ] Merge `react-migration` into `main` once fully verified; redeploy from `main` going forward.
-- [ ] PBE-II scope build-out: deeper hooks usage (useMemo/useCallback/custom hooks), Jest/RTL testing, performance optimization (lazy loading, code splitting), per the course plan.
+- [x] Testing infrastructure set up: Vitest + React Testing Library installed and configured; 28 passing tests across 4 files (unit, component, integration, and custom 404 suite). `npm test` exits 0 as of 2026-10-08.
+- [ ] PBE-II scope build-out: deeper hooks usage (`useMemo`/`useCallback` applied across Tracker, Dashboard, Portfolio), performance optimization (lazy loading, route-level code splitting completed), custom 404 page implemented, testing in progress (expanding test suites to remaining pages).
 - [ ] Consider `onSnapshot` for real cross-tab real-time sync if pursued.
 - [ ] Consider a server-side proxy for the Groq API key before any real-world/production use.
+- [ ] GitHub contribution graph embed on Portfolio page (requires GitHub API integration).
 
 ---
 
