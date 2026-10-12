@@ -326,59 +326,6 @@ scaffold/
 
 ---
 
-## 🔍 Disclosed Engineering Tradeoffs (Viva Transparency)
-
-To maintain academic integrity and technical accuracy, the following architectural tradeoffs are disclosed:
-
-1. **Optimistic Local Caching vs. WebSocket Listeners (`onSnapshot`)**:
-   - *Architecture*: The application reads Firestore documents using on-demand `getDoc` / `getDocs` request-response queries cached into `localStorage`, rather than maintaining persistent WebSocket connections via `onSnapshot()`.
-   - *Rationale*: Preserves Firestore connection quotas, avoids listener churn across frequent tab switches, and enables fast initial page hydration. Live sync is triggered per route load or on-demand via the **"Sync Now"** button in Settings.
-2. **Client-Side Security Challenge vs. Third-Party reCAPTCHA**:
-   - The login page features a custom client-side arithmetic challenge (`num1 + num2`) rather than Google's enterprise reCAPTCHA service. Labeled accurately as **"Security Check"**.
-3. **Browser-Native Print Engine vs. Heavy PDF Libraries**:
-   - Resume export utilizes native browser `window.print()` combined with clean `@media print` CSS rules (suppressing navbars, borders, and controls) rather than heavy JavaScript PDF generation engines (e.g. `jspdf` or `html2pdf`), reducing bundle size by ~300KB.
-4. **Client-Side API Key in Single Page App**:
-   - The Groq API key is bundled into the client build (`VITE_GROQ_API_KEY`). While suitable for this pure-frontend academic evaluation project, a production deployment would route requests through a cloud serverless proxy (Firebase Functions or Cloudflare Workers) to shield the credential.
-
----
-
-## 🎓 Viva & Architectural Defense Q&A
-
-### Q1: Why use React Context instead of Redux Toolkit or Zustand?
-> **Answer**: Scaffold manages three coherent data streams: authentication identity (`AuthContext`), developer profile attributes (`ProfileContext`), and Kanban project cards (`TrackerContext`). Because the update frequency is user-driven (submitting forms or moving Kanban cards) rather than high-frequency streaming ticks, React's built-in Context API coupled with custom hooks provides clean, dependency-free state synchronization without the bundle overhead of Redux.
-
-### Q2: How does the dual-tier AI architecture prevent redundancy?
-> **Answer**: `AiBubble.jsx` and `Assistant.jsx` serve complementary user intents. `AiBubble` acts as an ambient site concierge: it answers platform navigation questions, provides keyboard shortcut reminders, and looks up live profile metrics without interrupting the user's flow. In contrast, `Assistant.jsx` is a dedicated deep-work console designed for heavy generation (5-stage system design blueprints, multi-section resume audits). Both components share a single client service layer (`src/services/aiService.js`), eliminating code duplication.
-
-### Q3: Why is Firestore structured with a subcollection (`profiles/{userId}/projects`) instead of a root `projects` collection?
-> **Answer**: Subcollections enforce a clean security boundary. A single security rule:
-> ```javascript
-> match /profiles/{userId}/{document=**} {
->   allow read, write: if request.auth != null && request.auth.uid == userId;
-> }
-> ```
-> securely protects both the user profile document and all underlying project tasks with a single permission check. This completely prevents multi-tenant data bleed.
-
----
-
-## 🛠️ Debugging Chronicles (Viva Case Studies)
-
-To demonstrate genuine engineering problem-solving rather than boilerplate generation, here are three notable bugs resolved during development:
-
-1. **The "Client Is Offline" Firestore Saga**:
-   - *Symptom*: All Firestore calls failed with `FirebaseError: Failed to get document because the client is offline`, despite the Network tab reporting `200 OK`.
-   - *Debugging Process*: Tested in Incognito to rule out extensions; forced Firestore long-polling to rule out WebChannel issues; tested across different machines and mobile hotspots.
-   - *Root Cause*: The Cloud Firestore database had never been provisioned in the Firebase Console (the console was still showing the initial setup wizard). Provisioning the database immediately resolved the issue.
-2. **Groq Model Deprecation & Endpoint Migration**:
-   - *Symptom*: Assistant suddenly failed with HTTP 404/400 errors.
-   - *Debugging Process*: Discovered that `llama-3.3-70b-versatile` and `llama-3.1-8b-instant` were deprecated by Groq mid-project. Also caught an endpoint confusion between Groq Cloud and xAI's "Grok".
-   - *Resolution*: Queried Groq's `/models` endpoint directly to identify `openai/gpt-oss-20b` as a stable, ultra-fast replacement, and corrected the endpoint URL.
-3. **Honest Cloud Sync Audit (Eliminating "Realtime Active" Overclaim)**:
-   - *Symptom*: Settings Drawer originally claimed "Status: Realtime Active".
-   - *Resolution*: Audited codebase for `onSnapshot()` and found none. Replaced the label with honest status reporting (`Status: Synced` / `Last sync: [timestamp]`) and connected the "Sync Now" button to execute genuine Firestore `getDoc` / `getProjects` calls.
-
----
-
 ## 🔒 Proprietary Academic Notice (NOT Open Source)
 
 > ### ⚠️ STRICT PROPRIETARY NOTICE
