@@ -80,10 +80,10 @@ export function useGlobalShortcuts({
         return;
       }
 
-      // 8. Navigation: Alt + 1-7
-      if (e.altKey && e.key >= '1' && e.key <= '7') {
+      // 8. Navigation: Alt + 1-8
+      if (e.altKey && e.key >= '1' && e.key <= '8') {
         e.preventDefault();
-        const routes = ['/', '/dashboard', '/profile', '/tracker', '/portfolio', '/resume', '/assistant'];
+        const routes = ['/', '/dashboard', '/profile', '/tracker', '/portfolio', '/resume', '/assistant', '/interview'];
         const idx = parseInt(e.key, 10) - 1;
         if (routes[idx]) navigate(routes[idx]);
         return;

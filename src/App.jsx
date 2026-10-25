@@ -19,6 +19,7 @@ const Tracker = lazy(() => import('./pages/Tracker/Tracker.jsx'));
 const Portfolio = lazy(() => import('./pages/Portfolio/Portfolio.jsx'));
 const Resume = lazy(() => import('./pages/Resume/Resume.jsx'));
 const Assistant = lazy(() => import('./pages/Assistant/Assistant.jsx'));
+const Interview = lazy(() => import('./pages/Interview/Interview.jsx'));
 
 // Lightweight fallback for lazy-loaded route boundaries
 const RouteFallback = () => (
@@ -117,6 +118,16 @@ export default function App() {
                       <ProtectedRoute>
                         <Suspense fallback={<RouteFallback />}>
                           <Assistant />
+                        </Suspense>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/interview"
+                    element={
+                      <ProtectedRoute>
+                        <Suspense fallback={<RouteFallback />}>
+                          <Interview />
                         </Suspense>
                       </ProtectedRoute>
                     }

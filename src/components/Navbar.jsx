@@ -56,6 +56,7 @@ export default function Navbar() {
     { to: '/portfolio', label: 'portfolio' },
     { to: '/resume', label: 'resume' },
     { to: '/assistant', label: 'assistant' },
+    { to: '/interview', label: 'interview' },
   ];
 
   return (
@@ -276,6 +277,20 @@ export default function Navbar() {
               to="/assistant"
               end
               onClick={() => setMobileMenuOpen(false)}
+              className="mobile-nav-link block py-2 border-b"
+              style={({ isActive }) => ({
+                borderColor: 'var(--border)',
+                color: isActive ? 'var(--accent)' : 'var(--fg)',
+                fontWeight: isActive ? 600 : undefined,
+                textDecoration: 'none'
+              })}
+            >
+              <i className="fas fa-brain mr-2"></i> assistant
+            </NavLink>
+            <NavLink
+              to="/interview"
+              end
+              onClick={() => setMobileMenuOpen(false)}
               className="mobile-nav-link block py-2"
               style={({ isActive }) => ({
                 color: isActive ? 'var(--accent)' : 'var(--fg)',
@@ -283,7 +298,7 @@ export default function Navbar() {
                 textDecoration: 'none'
               })}
             >
-              <i className="fas fa-brain mr-2"></i> assistant
+              <i className="fas fa-microphone-lines mr-2 text-emerald-400"></i> interview
             </NavLink>
           </div>
         )}

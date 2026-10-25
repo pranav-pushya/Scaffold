@@ -521,6 +521,7 @@ export default function SettingsDrawer({ isOpen, onClose }) {
                   <option value="/portfolio">Portfolio (/portfolio)</option>
                   <option value="/resume">Resume (/resume)</option>
                   <option value="/assistant">Assistant (/assistant)</option>
+                  <option value="/interview">Interview (/interview)</option>
                 </select>
               </div>
             </div>

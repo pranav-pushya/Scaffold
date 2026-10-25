@@ -84,6 +84,15 @@ export default function CommandPalette({ isOpen, onClose, onOpenSettings, onTogg
       shortcut: 'Alt + 7',
       action: () => navigate('/assistant')
     },
+    {
+      id: 'nav-interview',
+      category: 'Navigation',
+      icon: 'fa-microphone-lines',
+      title: 'Go to Mock Interview & Viva Prep',
+      description: 'AI technical screening and viva defense simulator',
+      shortcut: 'Alt + 8',
+      action: () => navigate('/interview')
+    },
 
     // Actions & Tools
     {
