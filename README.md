@@ -75,26 +75,25 @@ Accessible via the navbar gear icon or pressing <kbd>?</kbd> / <kbd>Shift + /</k
 
 ---
 
-### 2. 🤖 Dual-Tier AI Intelligence Architecture
-Scaffold deliberately implements **two distinct AI touchpoints** engineered for different user intents:
+### 2. 🤖 Multi-Tier AI Intelligence Architecture
+Scaffold implements three specialized AI touchpoints engineered for different developer workflows:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          Scaffold AI Ecosystem                          │
-├────────────────────────────────────┬────────────────────────────────────┤
-│ 🟢 Ambient Floating Copilot        │ 🟣 Dedicated Assistant Page        │
-│    (AiBubble.jsx)                  │    (Assistant.jsx)                 │
-├────────────────────────────────────┼────────────────────────────────────┤
-│ • Always accessible from ANY page  │ • Full-page deep-work workstation  │
-│ • Bottom-right floating trigger    │ • Multi-mode generative coach      │
-│ • Zero-latency site FAQs & hotkeys │ • Comprehensive ATS resume audits  │
-│ • Live user project & ATS lookups  │ • 5-part system design blueprints  │
-│ • Strictly scoped to Scaffold only │ • Tailored project roadmap builds  │
-└────────────────────────────────────┴────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                                  Scaffold AI Ecosystem                                  │
+├──────────────────────────┬─────────────────────────────┬────────────────────────────────┤
+│ 🟢 Ambient Floating      │ 🟣 Deep-Work Assistant      │ 🎙️ Mock Interview Arena        │
+│    (AiBubble.jsx)        │    (Assistant.jsx)          │    (Interview.jsx)             │
+├──────────────────────────┼─────────────────────────────┼────────────────────────────────┤
+│ • Pinned on EVERY page   │ • Full-screen deep session  │ • Technical interview prep     │
+│ • Zero-latency site FAQs │ • Multi-mode coach (4 modes)│ • 5 tracks (Viva/React/Cloud)  │
+│ • Live user & ATS lookup │ • Comprehensive ATS audits  │ • Real-time 1–10 AI scoring    │
+│ • Strictly scoped guards │ • System architecture docs  │ • 1-Click Kanban task creation │
+└──────────────────────────┴─────────────────────────────┴────────────────────────────────┘
 ```
 
-- **Shared Service Layer (`src/services/aiService.js`)**: Both components share a single, unified Groq Cloud API service (`openai/gpt-oss-20b`), ensuring zero duplicate network code and consistent error handling.
-- **Strict Ambient Guardrails**: If an off-topic query (e.g. *"what is React"*, *"explain closures"*) or deep-work query (e.g. *"write my whole resume"*) is sent to `AiBubble`, it politely redirects the user to the appropriate tool.
+- **Shared Service Layer (`src/services/aiService.js`)**: All AI modules share a single, unified Groq Cloud API service (`openai/gpt-oss-20b`), ensuring zero duplicate network code, consistent error handling, and robust local keyword heuristic fallbacks for offline reliability.
+- **Strict Ambient Guardrails**: If an off-topic query or deep-work query is sent to `AiBubble`, it politely redirects the user to `/assistant` or `/interview`.
 
 ---
 
@@ -112,6 +111,7 @@ Scaffold is engineered as a keyboard-first Developer OS. Every primary action, r
 | <kbd>Alt + 5</kbd> | **Navigate to Portfolio** | Global | Jump to `/portfolio` (Live Showcase) |
 | <kbd>Alt + 6</kbd> | **Navigate to Resume** | Global | Jump to `/resume` (ATS Printable Sheet) |
 | <kbd>Alt + 7</kbd> | **Navigate to Assistant** | Global | Jump to `/assistant` (Deep-Work AI Workspace) |
+| <kbd>Alt + 8</kbd> | **Navigate to Interview** | Global | Jump to `/interview` (AI Mock Interview & Viva Prep Arena) |
 | <kbd>Alt + N</kbd> | **Quick Add Card** | Tracker | Opens new project task creation modal |
 | <kbd>Alt + E</kbd> / <kbd>Ctrl + P</kbd> | **Export / Print Resume** | Global / Resume | Triggers browser-native `@media print` PDF generator |
 | <kbd>Alt + A</kbd> | **Focus AI Copilot** | Global | Opens or focuses the ambient bottom-right AI bubble |
@@ -136,6 +136,8 @@ Scaffold is engineered as a keyboard-first Developer OS. Every primary action, r
 | **Portfolio Showcase** | `/portfolio` | Live public developer showcase auto-populated from completed tracker projects and verified skills. Includes shareable link generator. |
 | **ATS Resume Sheet** | `/resume` | Standardized, single-page ATS-compliant resume compiled directly from profile and project history. Exportable to PDF using browser-native `@media print` styling. |
 | **AI Assistant** | `/assistant` | Deep-work generative intelligence console with 4 dedicated coaching modes: *ATS Resume Coach*, *Project Inspiration*, *Portfolio Bio Writer*, and *System Architecture*. |
+| **AI Mock Interview & Viva Prep** | `/interview` | Interactive technical screening & viva defense cockpit with 5 specialized tracks (Scaffold Viva Defense, Frontend React, Backend, System Design, Behavioral), live stopwatch, code scratchpad, turn-by-turn AI evaluation, and 1-click Kanban task creation. |
+| **Terminal 404** | `*` (Catch-all) | Custom terminal-themed error diagnostic console (`404_`) displaying simulated curl response, invalid path telemetry, and instant recovery links. |
 
 ---
 
@@ -269,14 +271,24 @@ scaffold/
     │   ├── Boot/               # Terminal-style boot diagnostic sequence
     │   ├── Dashboard/          # Developer OS hub & ATS score calculator
     │   ├── Home/               # Public landing page
+    │   ├── Interview/          # AI Mock Interview Arena & Viva Prep Cockpit
     │   ├── Login/              # Authentication & custom security challenge
+    │   ├── NotFound/           # Terminal-style 404 diagnostic recovery page
     │   ├── Portfolio/          # Live developer showcase
     │   ├── Profile/            # Developer identity form
     │   ├── Resume/             # ATS-formatted printable resume sheet
     │   └── Tracker/            # Kanban project management board
     │
-    └── services/               # Shared backend service utilities
-        └── aiService.js        # Centralized Groq API completions & markdown parser
+    ├── services/               # Shared backend service utilities
+    │   └── aiService.js        # Centralized Groq API completions & markdown parser
+    │
+    └── test/                   # Automated Vitest + RTL test suites (33 passing tests)
+        ├── captchaUtils.test.js# Pure unit tests for math captcha generator & validator
+        ├── Footer.test.jsx     # Semantic layout and component integration tests
+        ├── Interview.test.jsx  # Multi-stage mock interview & track selection tests
+        ├── NotFound.test.jsx   # 404 route resolution & document title lifecycle tests
+        ├── ProtectedRoute.test.jsx # Context-mocked route authentication tests
+        └── setup.js            # Vitest + Jest-DOM matcher extensions
 ```
 
 ---
@@ -312,17 +324,29 @@ scaffold/
    VITE_GROQ_API_KEY=your_groq_api_key
    ```
 
-4. **Start the local development server**:
+4. **Run Automated Test Suite (CLO06)**:
+   ```bash
+   npm test
+   ```
+   Executes Vitest in single-pass mode (`33 tests across 5 test suites, 0 failures`).
+
+5. **Start the local development server**:
    ```bash
    npm run dev
    ```
    Open `http://localhost:5173` in your browser.
 
-5. **Execute Production Build**:
+6. **Execute Production Build**:
    ```bash
    npm run build
    ```
-   Compiles assets into `dist/` with code-splitting and asset optimization.
+   Compiles assets into `dist/` with route-level code splitting and asset optimization.
+
+7. **Deploy to Firebase Hosting**:
+   ```bash
+   npm run build
+   firebase deploy --only hosting
+   ```
 
 ---
 
