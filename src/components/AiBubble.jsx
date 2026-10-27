@@ -65,6 +65,7 @@ export default function AiBubble() {
       text: `👋 Hi **${userName}**! I'm your ambient workspace copilot. Ask me quick questions about your projects, ATS score, keyboard shortcuts, or site features.`,
       html: null,
       quickChips: [
+        { label: '🎙️ Mock Interview', query: 'How does the Mock Interview & Viva Prep page work?' },
         { label: '⚡ Shortcuts Guide', query: 'What are the keyboard shortcuts?' },
         { label: '📊 ATS Score', query: "What is my current ATS score and readiness?" },
         { label: '✅ Done Projects', query: 'How many projects are marked Done?' },
@@ -76,8 +77,8 @@ export default function AiBubble() {
 
   // Auto-scroll chat to bottom
   useEffect(() => {
-    if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (isOpen && typeof messagesEndRef.current?.scrollIntoView === 'function') {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isThinking, isOpen]);
 
@@ -141,6 +142,7 @@ export default function AiBubble() {
               <div>3. <strong class="text-white">Tracker</strong> (<code>/tracker</code>) — Kanban board (To-Do / In Progress / Done)</div>
               <div>4. <strong class="text-white">Portfolio</strong> (<code>/portfolio</code>) — Auto-generated live public showcase</div>
               <div>5. <strong class="text-white">Resume</strong> (<code>/resume</code>) — Instant ATS-compliant printable PDF sheet</div>
+              <div>6. <strong class="text-white">Mock Interview</strong> (<code>/interview</code>) — AI-powered viva prep &amp; technical screening arena</div>
             </div>
             <p class="text-[11px] text-muted">All data syncs with Cloud Firestore so information is entered once and reflected everywhere.</p>
           </div>
@@ -183,8 +185,46 @@ export default function AiBubble() {
             <li><strong class="text-amber-400">Alt + L</strong> — Quick Sign Out</li>
             <li><strong class="text-amber-400">T</strong> — Cycle Theme (Dark / Light / Cyber)</li>
             <li><strong class="text-amber-400">?</strong> — Open Workspace Settings Drawer</li>
-            <li><strong class="text-amber-400">Alt + 1-7</strong> — Jump to Modules (Home, Dashboard, Profile, Tracker, Portfolio, Resume, Assistant)</li>
+            <li><strong class="text-amber-400">Alt + 1-8</strong> — Jump to Modules (Home, Dashboard, Profile, Tracker, Portfolio, Resume, Assistant, Interview)</li>
+            <li><strong class="text-amber-400">Alt + 8</strong> — Open Mock Interview &amp; Viva Prep Arena</li>
           </ul>
+        `
+      };
+    }
+
+    // 5. Mock Interview & Viva Prep Knowledge
+    if (
+      q.includes('interview') ||
+      q.includes('viva') ||
+      q.includes('mock') ||
+      q.includes('screening') ||
+      q.includes('question bank') ||
+      (q.includes('practice') && (q.includes('technical') || q.includes('code') || q.includes('prep') || q.includes('viva')))
+    ) {
+      return {
+        matched: true,
+        html: `
+          <div class="space-y-2 text-xs">
+            <p class="font-bold text-emerald-400">🎙️ AI Mock Interview Arena &amp; Viva Prep:</p>
+            <p class="text-muted leading-relaxed">
+              Scaffold features an interactive technical screening and viva defense cockpit at <a href="/interview" class="text-amber-400 underline font-mono font-bold">/interview</a> (or press <kbd class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono text-[11px] border border-amber-500/30">Alt + 8</kbd>).
+            </p>
+            <div class="p-2.5 rounded border bg-black/20 font-mono text-[11px] space-y-1 text-muted" style="border-color: var(--border);">
+              <div>• <strong class="text-emerald-400">5 Tracks:</strong> Scaffold Viva Defense (Chitkara FEE-II specific), Frontend React, Backend &amp; Cloud, System Design, and Behavioral (STAR).</div>
+              <div>• <strong class="text-emerald-400">Interactive Cockpit:</strong> Live stopwatch timer, guidance hint toggle, dual text/code scratchpad with syntax styling.</div>
+              <div>• <strong class="text-emerald-400">AI Grading:</strong> Instant 1–10 score, verdict, strengths breakdown, improvement notes, and concise model answer.</div>
+              <div>• <strong class="text-emerald-400">Closed-Loop:</strong> 1-click <em>"Add to Kanban Tracker"</em> button pushes recommended study topics straight into your task board!</div>
+            </div>
+            <div class="pt-1">
+              <a
+                href="/interview"
+                class="btn-primary text-xs px-3 py-1.5 inline-flex items-center gap-1.5"
+                style="background: #10b981; color: #fff;"
+              >
+                <i class="fas fa-microphone-lines"></i> Open Mock Interview Arena →
+              </a>
+            </div>
+          </div>
         `
       };
     }
@@ -297,7 +337,7 @@ export default function AiBubble() {
         html: `
           <div class="space-y-1 text-xs">
             <p class="font-bold text-emerald-400">⚙️ Default Landing Route:</p>
-            <p class="text-muted">You can configure whether Scaffold opens on <strong>Home (/)</strong>, <strong>Dashboard (/dashboard)</strong>, or <strong>Tracker (/tracker)</strong> inside the <strong>Workspace Settings</strong> drawer (<kbd class="px-1 py-0.5 rounded bg-black/30 text-amber-400 font-mono text-[10px]">?</kbd>) under <em>Appearance &amp; UX</em>.</p>
+            <p class="text-muted">You can configure whether Scaffold opens on <strong>Home (/)</strong>, <strong>Dashboard (/dashboard)</strong>, <strong>Tracker (/tracker)</strong>, or <strong>Interview (/interview)</strong> inside the <strong>Workspace Settings</strong> drawer (<kbd class="px-1 py-0.5 rounded bg-black/30 text-amber-400 font-mono text-[10px]">?</kbd>) under <em>Appearance &amp; UX</em>.</p>
           </div>
         `
       };
@@ -397,10 +437,11 @@ CRITICAL RULES & SCOPE:
 4. If asked "website kya karte hai", "ye kya hai", or "what does this website do" (in English, Hindi, or Hinglish), explain Scaffold specifically: a closed-loop developer workspace connecting Profile -> AI Suggestions -> Tracker -> Portfolio -> Resume.
 5. If asked "how to make this website full screen" or about full screen, state clearly: "Press Alt + F anywhere to toggle native Full Screen mode in Scaffold (or use Ctrl + K -> Toggle Full Screen Mode)." Do NOT output generic CSS like height:100vh or overflow:hidden.
 6. Keep all responses brief, friendly, and actionable (2 to 4 sentences maximum). Format text with clean HTML tags like <strong>, <em>, <code>, <kbd>, <ul><li>.
+7. If asked about interview preparation, viva defense, mock interviews, technical screening, or /interview, explain the AI Mock Interview Arena at /interview (Alt + 8) with its 5 specialized tracks (Scaffold Viva Defense for Chitkara FEE-II, Frontend React, Backend, System Design, Behavioral), timer, live code scratchpad, 1-10 scoring, and 1-click Kanban study task integration.
 
 GROUND-TRUTH CONTEXT ABOUT THIS APP (SCAFFOLD):
 - Core Concept: Closed-loop developer workspace where user data entered once reflects everywhere:
-  Profile (skills/goals) -> AI Suggestions -> Kanban Tracker -> Completed Portfolio -> ATS Resume Sheet.
+  Profile (skills/goals) -> AI Suggestions & Mock Interview -> Kanban Tracker -> Completed Portfolio -> ATS Resume Sheet.
 - Navigation & Shortcuts:
   * Alt + 1: Home (/) — Landing page, terminal boot animation, feature cards.
   * Alt + 2: Dashboard (/dashboard) — Profile readiness %, ATS score gauge, project status counts, AI coach insight cards.
@@ -409,18 +450,21 @@ GROUND-TRUTH CONTEXT ABOUT THIS APP (SCAFFOLD):
   * Alt + 5: Portfolio (/portfolio) — Auto-generated live developer showcase from profile and completed projects.
   * Alt + 6: Resume (/resume) — ATS-compliant resume sheet compiled from profile and projects, exportable to PDF via native print styling (Alt + E / Ctrl + P).
   * Alt + 7 (or Alt + A): Assistant (/assistant) — Dedicated deep-work AI Career & Code Assistant powered by Groq (ATS resume audit, project ideas, portfolio bio, system design).
+  * Alt + 8: Interview (/interview) — AI Mock Interview Arena & Viva Prep Cockpit with 5 tracks (Scaffold Viva Defense, Frontend React, Backend, System Design, Behavioral), live timer, dual text/code scratchpad, 1–10 AI scoring, and 1-click Kanban task creation.
 - Global Keyboard Shortcuts:
   * Alt + F: Toggle native Full Screen Mode (with on-screen exit button).
   * Ctrl + K or /: Open Command & Search Palette.
   * Alt + N: Quick Add Card modal on Tracker.
   * Alt + E or Ctrl + P: Print / Export Resume PDF.
+  * Alt + A: Focus AI Copilot Prompt.
   * Alt + L: Quick Sign Out.
   * T: Cycle Theme instantly between Dark, Light, and Cyber.
   * ?: Open Workspace Settings Drawer.
+  * Alt + 1-8: Jump directly to modules (Home, Dashboard, Profile, Tracker, Portfolio, Resume, Assistant, Interview).
   * Esc: Universal dismiss for open drawers, modals, and palette.
 - Workspace Settings Drawer (gear icon in navbar or '?'):
   * Data Management: Export JSON workspace backup, Import JSON, Purge Local Cache.
-  * Appearance & UX: Reduce Motion & Glow toggle, Compact Density toggle, Default Landing Route selector (Home, Dashboard, or Tracker).
+  * Appearance & UX: Reduce Motion & Glow toggle, Compact Density toggle, Default Landing Route selector (Home, Dashboard, Tracker, or Interview).
   * Portfolio Visibility: Toggle Public vs Private showcase link, Copy public portfolio link (/portfolio).
   * Cloud Data Sync: Status indicator (Synced / Syncing... / Local Only), last sync timestamp, and "Sync Now" button (on-demand Firestore fetch).
   * System Information: Version 1.2.0-react, React 18, Vite, Cloud Firestore, local cache size.
@@ -606,7 +650,6 @@ LOGGED-IN USER CONTEXT:
                     {msg.html ? (
                       <div
                         className="prose-content space-y-1.5"
-                        dangerouslySet brain-html="true"
                         dangerouslySetInnerHTML={{ __html: msg.html }}
                       />
                     ) : (
